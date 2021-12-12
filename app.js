@@ -1,19 +1,16 @@
 const express = require ('express');
-const dotenv = require ('dotenv');
-const passport = require ('passport');
-const cookieSession = require('cookie-session');
-const flash = require('express-flash')
-const session = require('express-session')
-
-dotenv.config();
-
-//Fetch all the routes
-//const feedRoutes = require('./routes/feed');
-const signInSignUp = require('./routes/signInSignUp');
+const flash = require('express-flash');
+//const passport = require ('passport');
+const session = require('express-session');
+const passport = require('passport');
 
 
+// Access to veriables set in the .env file via 'process.env.VERIABLE_NAME'
+require ('dotenv').config();
 
+// Creat the Express application
 const app = express();
+app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 
 
@@ -24,7 +21,34 @@ app.use((req, res, next) =>{
     next();
 });
 
+// Require the passport
+require('./config/passport');
+
+app.use(flash());
+
+// Setup the session
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {maxAge: 1000 * 60 * 60 * 24}
+}))
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Fetch all the routes for the application
+const signInSignUp = require('./routes/signInSignUp');
+
+// function errHandler(err, req, res, next){
+//     res.json({err: err})
+// }
+
+// Routes
 app.use('/', signInSignUp);
 
+// Get all the err without crash
+//app.use(errHandler);
 
-app.listen(8080, () => console.log('Server is running'));
+// Server listen on http//localhost:3000
+app.listen(3000, () => console.log('Server is running'));
