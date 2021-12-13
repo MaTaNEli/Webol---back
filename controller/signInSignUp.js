@@ -1,19 +1,18 @@
 const bcrypt = require ("bcryptjs");
 const jwt = require ('jsonwebtoken');
-const passport = require ('passport');
+//const passport = require ('passport');
 const DB = require ('../config/database')
-var qs = require('querystring');
+//var qs = require('querystring');
 
 
 exports.registerPosts = async (req, res) =>{
     console.log(req.body);
 
     //check if user is in DB
+
     //hash the password
     if(!req.body.password){
-        console.log("if you are here we have a problem")
-        return res.status(200).json('its not good no data')
-        
+        return res.status(200).json({error: "there is no password"})
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -41,14 +40,48 @@ exports.registerPosts = async (req, res) =>{
 
 exports.logInPost = async (req, res) =>{
 
-    //check if user is in DB
-    //hash the password
-    res.status(200).json('success to login');
+    let userInfo = {};
+    if (req.body.username){
+        console.log("1");
+        userInfo = DB.searcInDB(req.body.username)
+    }
+
+    if (!userInfo){
+        return res.status(401).json({error: "could not find user"})
+    } 
+
+    if (await bcrypt.compare(req.body.password, userInfo.password)){
+        const token = await jwt.sign({id: userInfo.id}, process.env.TOKEN_SECRET);
+        console.log("2");
+        res.status(200).header('auth-token', token).json({token});
+    } else {
+        console.log("3");
+        res.status(401).json({error: "password incorrect"});
+    }
+    
 };
 
-exports.notSignIn = async (req, res) =>{
-    const response = {
-        "signin": false
-    }
-    res.status(201).json(response);
+exports.notSignIn = (req, res) =>{
+    res.status(401).json("could not loggin")
 };
+
+exports.logout = (req, res) =>{
+    req.logout();
+    res.status(200).json({message: 'logged out successfully'})
+};
+
+exports.s = (req, res) =>{
+    //res.status(200).json({matan: 'matan'})
+    //res.setHeader("set-cookie", ["matan"]);
+    if (req.session.viewCount)
+    {
+        req.session.viewCount++
+    } else {
+        req.session.viewCount = 1;
+    }
+    let user = DB.searcIdInDB(req.user.id)
+
+    res.status(200).json({fullname: user.full_name});    
+};
+
+

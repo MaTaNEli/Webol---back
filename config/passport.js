@@ -4,8 +4,7 @@ const DB = require ('./database');
 
 function initialize(passport) {
     const authenticateUser = async (email, password ,done) => {
-        console.log(email)
-        console.log(password)
+        console.log(email, password)
         const user = DB.searcInDB(email);
         if (!user){
             return done(null, false, {message: 'the user could not find'});
@@ -19,17 +18,18 @@ function initialize(passport) {
         
     }
 
-    passport.use(new LocalStrategy({usernameField: 'email'}, authenticateUser));
+    passport.use(new LocalStrategy({usernameField: 'username'}, authenticateUser));
 
 
     passport.serializeUser((user, done) => {
-        done(null, user.id);
+        done(null, user);
     });
     
-    passport.deserializeUser((userId, done) => {
-        const user = DB.searcIdInDB(userId)
-        if (user){
-            return done(null, user);
+    passport.deserializeUser((user, done) => {
+        const userid = DB.searcIdInDB(user.id);
+        console.log(userid, "23435467687");
+        if (userid){
+            return done(null, userid);
         } else {
             return done(null, false);
         }

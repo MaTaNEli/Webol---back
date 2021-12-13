@@ -1,9 +1,8 @@
 const express = require ('express');
 const flash = require('express-flash');
-//const passport = require ('passport');
 const session = require('express-session');
 const passport = require('passport');
-
+const cors = require ('cors');
 
 // Access to veriables set in the .env file via 'process.env.VERIABLE_NAME'
 require ('dotenv').config();
@@ -12,14 +11,15 @@ require ('dotenv').config();
 const app = express();
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
+app.use(cors());
 
+// app.use((req, res, next) =>{
+//     res.setHeader('Access-Control-Allow-Origin', '*');
+//     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
+//     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+//     next();
+// });
 
-app.use((req, res, next) =>{
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    next();
-});
 
 // Require the passport
 require('./config/passport');

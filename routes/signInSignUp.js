@@ -1,32 +1,37 @@
 const express = require('express');
 const passport = require ('passport');
-const jwt = require ('jsonwebtoken');
 const controller = require('../controller/signInSignUp');
-const { initialize } = require('passport');
+const verify = require ('./verifyToken');
 const router = express.Router();
 
-const initializePassport = require ('../config/passport')
-initializePassport(passport);
+
+// const initializePassport = require ('../config/passport')
+// initializePassport(passport);
 
 router.post('/register', controller.registerPosts);
 
-router.post('/login', passport.authenticate('local', {
-    failureFlash: true, failureRedirect: '/failedToSignIn',
-}), controller.logInPost);
+router.post('/login', controller.logInPost);
 
-router.get('/failedToSignIn', controller.notSignIn);
+//router.get('/login-faile', controller.notSignIn);
+//router.get('/login-success', controller.logInPost);
 
+router.get('/matan', verify.token, controller.s);
+
+router.delete('/logout', controller.logout);
 
 module.exports = router;
 
 
-// router.get('/', (req, res) => {
-//     res.status(200).json({matan: 'matan'})
-//     if (req.session.viewCount)
-//     {
-//         req.session.viewCount++
-//     }else{
-//         req.session.viewCount = 1;
+// function checkAuthenticated(req, res, next) {
+//     if (req.isAuthenticated()) {
+//         return next();
 //     }
-//     res.status(200).json(`${req.session.viewCount}`);
-// });
+//     res.json({error: 'could not find any user'})
+// }
+  
+// function checkNotAuthenticated(req, res, next) {
+//     if (req.isAuthenticated()) {
+//         return res.status(200).json("you already logged in")
+//     }
+//     next()
+// }
