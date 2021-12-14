@@ -17,9 +17,9 @@ router.post('/login',passport.authenticate('local', {failureRedirect: '/login-fa
 router.get('/login-faile', controller.loginFailed);
 router.get('/login-success', checkAuthenticated, controller.loginSuccess);
 
-router.get('/matan', verify.token, controller.s);
+router.get('/matan', controller.s);
 
-router.delete('/logout', controller.logout);
+router.get('/logout', controller.logout);
 
 module.exports = router;
 

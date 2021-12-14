@@ -9,8 +9,9 @@ require ('dotenv').config();
 
 // Creat the Express application
 const app = express();
-app.use(express.urlencoded({extended: true}));
 app.use(express.json());
+app.use(express.urlencoded({extended: true}));
+
 app.use(cors());
 
 // app.use((req, res, next) =>{
@@ -29,8 +30,8 @@ app.use(flash());
 // Setup the session
 app.use(session({
     secret: process.env.SESSION_SECRET,
-    resave: true,
-    saveUninitialized: true,
+    resave: false,
+    saveUninitialized: false,
     cookie: {maxAge: 1000 * 60 * 60 * 24}
 }))
 

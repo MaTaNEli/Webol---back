@@ -71,21 +71,29 @@ exports.loginSuccess = (req, res) =>{
 
 exports.logout = (req, res) =>{
     req.logout();
+    req.session.destroy();
     res.status(200).json({message: 'logged out successfully'})
 };
 
 exports.s = (req, res) =>{
     //res.status(200).json({matan: 'matan'})
     //res.setHeader("set-cookie", ["matan"]);
+    let user = {}
     if (req.session.viewCount)
     {
         req.session.viewCount++
     } else {
         req.session.viewCount = 1;
     }
-    let user = DB.searcIdInDB(req.user.id)
+    if(req.user && req.user.id)
+        user = DB.searcIdInDB(req.user.id)
 
-    res.status(200).json({fullname: user.full_name});    
+    if (user)
+        res.status(200).json({fullname: user.full_name, session: req.session.viewCount});
+    else{
+        //return res.redirect('/logout');
+        res.status(200).json({session: req.session.viewCount});
+    }    
 };
 
 
