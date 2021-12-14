@@ -29,13 +29,19 @@ app.use(flash());
 // Setup the session
 app.use(session({
     secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
+    resave: true,
+    saveUninitialized: true,
     cookie: {maxAge: 1000 * 60 * 60 * 24}
 }))
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use((req, res, next) => {
+    console.log(req.session, "session");
+    console.log(req.user, "user");
+    next();
+});
 
 // Fetch all the routes for the application
 const signInSignUp = require('./routes/signInSignUp');

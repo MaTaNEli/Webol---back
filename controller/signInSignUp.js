@@ -61,8 +61,12 @@ exports.logInPost = async (req, res) =>{
     
 };
 
-exports.notSignIn = (req, res) =>{
+exports.loginFailed = (req, res) =>{
     res.status(401).json("could not loggin")
+};
+
+exports.loginSuccess = (req, res) =>{
+    res.status(200).json("you are log in")
 };
 
 exports.logout = (req, res) =>{

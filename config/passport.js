@@ -22,14 +22,16 @@ function initialize(passport) {
 
 
     passport.serializeUser((user, done) => {
-        done(null, user);
+        console.log(user, "serializeUser")
+        done(null, user.id);
     });
     
-    passport.deserializeUser((user, done) => {
-        const userid = DB.searcIdInDB(user.id);
-        console.log(userid, "23435467687");
-        if (userid){
-            return done(null, userid);
+    passport.deserializeUser((userId, done) => {
+        console.log(userId, "userdeserializeUser")
+        const user = DB.searcIdInDB(userId);
+        console.log(user, "deserializeUser");
+        if (user){
+            return done(null, user);
         } else {
             return done(null, false);
         }
