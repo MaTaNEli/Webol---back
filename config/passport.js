@@ -1,40 +1,42 @@
 const LocalStrategy = require ('passport-local').Strategy;
 const bcrypt = require ('bcryptjs');
-const DB = require ('./database');
+const connection = require('./database');
+const User = connection.models.User;
+
 
 function initialize(passport) {
     const authenticateUser = async (email, password ,done) => {
         console.log(email, password)
-        const user = DB.searcInDB(email);
-        if (!user){
-            return done(null, false, {message: 'the user could not find'});
-        } 
+        User.findOne({email: email})
+        .then(async (user) =>{
+            if (!user){
+                return done(null, false);
+            }
 
-        if (await bcrypt.compare(password, user.password)){
-            return done(null, user);
-        } else {
-            return done(null, false, {message: 'Password incorrect'});
-        }
-        
-    }
+            if (await bcrypt.compare(password, user.password)){
+                console.log("passport line 17")
+                return done(null, user);
+            } else {
+                return done(null, false);
+            }
+        }).catch(e => console.log(e));
+    };
 
     passport.use(new LocalStrategy({usernameField: 'username'}, authenticateUser));
 
 
     passport.serializeUser((user, done) => {
-        console.log(user, "serializeUser")
-        done(null, user.id);
+        console.log(user, "im the user from config/passport line 29");
+        done(null, user._id);
     });
-    
+
     passport.deserializeUser((userId, done) => {
-        console.log(userId, "userdeserializeUser")
-        const user = DB.searcIdInDB(userId);
-        console.log(user, "deserializeUser");
-        if (user){
-            return done(null, user);
-        } else {
-            return done(null, false);
-        }
+        console.log(userId, "adsvbgfnhgfdsgdvsfdbgbfbfsbsdvsdv")
+        User.findById({_id: userId})
+            .then((user) => {
+                done(null, user);
+            })
+            .catch(err => done(err))
     });
 };
 

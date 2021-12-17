@@ -1,39 +1,61 @@
+const Joi = require ('@hapi/joi')
 const bcrypt = require ("bcryptjs");
 const jwt = require ('jsonwebtoken');
+const { registerValidation } = require ('../validate/registerValidate')
+
+const connection = require('../config/database');
+const User = connection.models.User;
+
+
 //const passport = require ('passport');
-const DB = require ('../config/database')
 //var qs = require('querystring');
 
 
 exports.registerPosts = async (req, res) =>{
-    console.log(req.body);
+    let errMessage = ""
+    // Validate the data
+    const { error } = registerValidation(req.body);
 
-    //check if user is in DB
-
-    //hash the password
-    if(!req.body.password){
-        return res.status(200).json({error: "there is no password"})
+    console.log(error)
+    if (error){
+        return res.json({error: error.details[0].message});
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashpass = await bcrypt.hash(req.body.password, salt);
 
+    // Check if user is in DB
+    await User.findOne({email: req.body.email})
+    .then((user) =>{
+        if (user){
+            errMessage = "email is already sign in";
+        } 
+    })
+    .catch (e => console.log(e, "Error in find user in db line 29 controller/signInSignUp"));
     
-    //create user
-    const user = {
-        id: Date.now().toString(),
-        full_name: req.body.fullname,
-        name: req.body.username,
-        email: req.body.email,
-        password: hashpass,
-    };
-    
-    try{
-        //save the user in DB
-        await DB.addToDB(user);
-        res.status(200).json({user: user});
-    }catch(err){
-        res.status(400).json(err);
+    if (errMessage == ""){
+
+        // Hash the password
+        const salt = await bcrypt.genSalt(12);
+        const hashpass = await bcrypt.hash(req.body.password, salt);
+
+        // Create a user
+        const newUser = new User({
+            username: req.body.username,
+            password: hashpass,
+            email: req.body.email,
+            full_name: req.body.full_name,
+            logedin: false
+        })
+
+        try{
+            // Save the user in DB
+            await newUser.save().then((user) => console.log("saved the user"))
+            return res.status(200).json({user: "Sign in successfully"});
+        } catch (err) {
+            console.log(err)
+            return res.status(400).json({error: "there is error chatch line 52 in controller/signInSignUp"});
+        }
+    } else {
+        return res.status(200).json({error, errMessage});
     }
 };
 
@@ -42,8 +64,7 @@ exports.logInPost = async (req, res) =>{
 
     let userInfo = {};
     if (req.body.username){
-        console.log("1");
-        userInfo = DB.searcInDB(req.body.username)
+        console.log("1");  
     }
 
     if (!userInfo){
@@ -58,15 +79,27 @@ exports.logInPost = async (req, res) =>{
         console.log("3");
         res.status(401).json({error: "password incorrect"});
     }
-    
 };
 
 exports.loginFailed = (req, res) =>{
-    res.status(401).json("could not loggin")
+    const error = {
+        logedin: false, 
+        message: "Username or Password is incorrect"
+    }
+    res.status(401).json(error)
 };
 
 exports.loginSuccess = (req, res) =>{
-    res.status(200).json("you are log in")
+    User.findById(req.session.passport.user)
+    .then((result) =>{
+        const user = {
+            name: result.username,
+            email: result.email
+        }
+        console.log("loginSuccess function in controller/signinsignup")
+        return res.status(200).json({user:user})
+    })
+    .catch(e => console.log(e))
 };
 
 exports.logout = (req, res) =>{

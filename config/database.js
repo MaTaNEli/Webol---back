@@ -1,17 +1,51 @@
-const DB = [];
+const mongoose = require('mongoose');
 
-exports.searcInDB = (email) => {
-    return DB.find(user => user.email === email)
-};
+require('dotenv').config();
 
-exports.searcIdInDB = (id) => {
-    return DB.find(user => user.id === id)
-};
+/**
+ * -------------- DATABASE ----------------
+ */
 
-exports.printDB = () => {
-    return DB;
-};
+/**
+ * Connect to MongoDB Server using the connection string in the `.env` file.  To implement this, place the following
+ * string into the `.env` file
+ * 
+ * DB_STRING=mongodb://<user>:<password>@localhost:27017/database_name
+ */ 
 
-exports.addToDB = (data) =>{
-    DB.push(data);
-};
+const conn = process.env.DB_STRING;
+
+const connection = mongoose.createConnection(conn, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+},() =>console.log("Connected to DB"));
+
+// Creates schema for a User
+const UserSchema = new mongoose.Schema({
+    username:{
+        type:String,
+        required:true
+    },
+    password: {
+        type:String,
+        min: 6
+    },
+    email:{
+        type: String,
+        required:true,
+        unique: true
+    },
+    full_name:{
+        type: String,
+        required:true
+    },
+    logedin:{
+        type: Boolean
+    }
+});
+
+
+const User = connection.model('User', UserSchema);
+
+// // Expose the connection
+module.exports = connection;
