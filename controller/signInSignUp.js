@@ -1,26 +1,19 @@
-const Joi = require ('@hapi/joi')
 const bcrypt = require ("bcryptjs");
 const jwt = require ('jsonwebtoken');
-const { registerValidation } = require ('../validate/registerValidate')
+const User = require('../config/database');
+const { registerValidation, loginValidation } = require ('../validate/registerValidate')
 
-const connection = require('../config/database');
-const User = connection.models.User;
-
-
-//const passport = require ('passport');
 //var qs = require('querystring');
-
 
 exports.registerPosts = async (req, res) =>{
     let errMessage = ""
     // Validate the data
     const { error } = registerValidation(req.body);
 
-    console.log(error)
+    //console.log(req.header('auth-token'));
     if (error){
         return res.json({error: error.details[0].message});
     }
-
 
     // Check if user is in DB
     await User.findOne({email: req.body.email})
@@ -43,7 +36,6 @@ exports.registerPosts = async (req, res) =>{
             password: hashpass,
             email: req.body.email,
             fullname: req.body.fullname,
-            logedin: false
         })
 
         try{
@@ -62,72 +54,86 @@ exports.registerPosts = async (req, res) =>{
 
 exports.logInPost = async (req, res) =>{
 
-    let userInfo = {};
-    if (req.body.username){
-        console.log("controller/signinsignup line 67");  
+    let errMessage = "";
+
+    // Validate the data
+    const { error } = loginValidation(req.body);
+
+    //console.log(req.header('auth-token'));
+    if (error){
+        return res.json({error: error.details[0].message});
     }
 
-    if (!userInfo){
-        return res.status(401).json({error: "could not find user"})
-    } 
+   await User.findOne({email: req.body.username})
+        .then(async (user) =>{
+            if (!user){
+                errMessage = "Email or Password are incorrect"
+                return res.status(200).json({error: errMessage})
+            }
 
-    if (await bcrypt.compare(req.body.password, userInfo.password)){
-        const token = await jwt.sign({id: userInfo.id}, process.env.TOKEN_SECRET);
-        console.log("controller/signinsignup line 76");
-        res.status(200).header('auth-token', token).json({token});
-    } else {
-        console.log("controller/signinsignup line 79");
-        res.status(401).json({error: "password incorrect"});
-    }
-};
 
-exports.loginFailed = (req, res) =>{
-    const error = {
-        logedin: false, 
-        message: "Username or Password is incorrect"
-    }
-    res.status(401).json(error)
-};
+            else if (await bcrypt.compare(req.body.password, user.password)){
+                const token = await jwt.sign({id: user.id}, process.env.TOKEN_SECRET);
+                const UserInfo = {
+                    username: user.username,
+                    auth_token: token                    
+                }
+                res.status(200).json({UserInfo});
+            } else {
+                errMessage = "Email or Password are incorrect"
+                return res.status(200).json({error: errMessage})
+            }
+        }).catch(e => console.log(e));
 
-exports.loginSuccess = (req, res) =>{
-    console.log(req.session.passport, "supose to be a user")
-    User.findById(req.session.passport.user)
-    .then((result) =>{
-        const user = {
-            name: result.username,
-            email: result.email
+        if (errMessage != ""){
+            console.log("/controller/signinsignup line 84")
+            res.status(200).json({error: errMessage})
         }
-        console.log("loginSuccess function in controller/signinsignup")
-        return res.status(200).json({user:user})
-    })
-    .catch(e => console.log(e))
 };
 
-exports.logout = (req, res) =>{
-    req.logout();
-    req.session.destroy();
-    res.status(200).json({message: 'logged out successfully'})
+exports.googleLogIn = async (req, res) =>{
+    let errMessage = "";
+    console.log(req.body);
+    // Create a user
+
+    await User.findOne({email: req.body.email})
+    .then(async (user) => {
+        if (!user){
+            const newUser = new User({
+                username: req.body.name,
+                password: "google_Authentication",
+                email: req.body.email,
+                fullname: req.body.name
+            });
+            await newUser.save().then((user) => console.log("saved the user"));
+        }
+    });
+
+    await User.findOne({email: req.body.email})
+        .then(async (user) =>{
+            if (!user){
+                errMessage = "There was an error with user sign"
+                return res.status(200).json({error: errMessage})
+            } else {
+                const token = await jwt.sign({id: user.id}, process.env.TOKEN_SECRET);
+                const UserInfo = {
+                    username: user.username,
+                    auth_token: token                    
+                }
+                res.status(200).json({UserInfo});
+            }
+        })
 };
+
+
+
+
 
 exports.s = (req, res) =>{
-    //res.status(200).json({matan: 'matan'})
-    //res.setHeader("set-cookie", ["matan"]);
-    //let user = {}
-    if (req.session.viewCount)
-    {
-        req.session.viewCount++
-    } else {
-        req.session.viewCount = 1;
-    }
-    // if(req.user && req.user.id)
-    //     user = DB.searcIdInDB(req.user.id)
+    console.log(req.user);
 
-    // if (user)
-    //     res.status(200).json({fullname: user.full_name, session: req.session.viewCount});
-    // else{
-    //     //return res.redirect('/logout');
-        res.status(200).json({session: req.session.viewCount});
-    //}    
+    res.status(200).json({user: req.user});
+    
 };
 
 

@@ -1,7 +1,7 @@
 const jwt = require ('jsonwebtoken');
 
 exports.token = async  (req, res, next) => {
-    const token = await req.header('auth-token');
+    const token = await req.header('auth_token');
     if (!token) return res.status(401).json('Access Denide');
 
     console.log(token);

@@ -23,17 +23,11 @@
   "dependencies": {
     "@hapi/joi": "^17.1.1",
     "bcryptjs": "^2.4.3",
-    "connect-mongo": "^4.6.0",
     "cookie-session": "^1.4.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
-    "express-flash": "^0.0.2",
-    "express-session": "^1.17.2",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.1.2",
-    "passport": "^0.5.0",
-    "passport-google-oauth20": "^2.0.0",
-    "passport-local": "^1.0.0",
     "pg": "^8.7.1"
   }
 }
