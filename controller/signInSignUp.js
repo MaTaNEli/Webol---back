@@ -42,7 +42,7 @@ exports.registerPosts = async (req, res) =>{
             username: req.body.username,
             password: hashpass,
             email: req.body.email,
-            full_name: req.body.full_name,
+            fullname: req.body.fullname,
             logedin: false
         })
 
@@ -90,6 +90,7 @@ exports.loginFailed = (req, res) =>{
 };
 
 exports.loginSuccess = (req, res) =>{
+    console.log(req.session.passport, "supose to be a user")
     User.findById(req.session.passport.user)
     .then((result) =>{
         const user = {
@@ -111,22 +112,22 @@ exports.logout = (req, res) =>{
 exports.s = (req, res) =>{
     //res.status(200).json({matan: 'matan'})
     //res.setHeader("set-cookie", ["matan"]);
-    let user = {}
+    //let user = {}
     if (req.session.viewCount)
     {
         req.session.viewCount++
     } else {
         req.session.viewCount = 1;
     }
-    if(req.user && req.user.id)
-        user = DB.searcIdInDB(req.user.id)
+    // if(req.user && req.user.id)
+    //     user = DB.searcIdInDB(req.user.id)
 
-    if (user)
-        res.status(200).json({fullname: user.full_name, session: req.session.viewCount});
-    else{
-        //return res.redirect('/logout');
+    // if (user)
+    //     res.status(200).json({fullname: user.full_name, session: req.session.viewCount});
+    // else{
+    //     //return res.redirect('/logout');
         res.status(200).json({session: req.session.viewCount});
-    }    
+    //}    
 };
 
 

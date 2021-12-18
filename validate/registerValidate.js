@@ -12,7 +12,7 @@ const registerValidation = data => {
         email:Joi.string()
             .required()
             .email(),
-        full_name:Joi.string()
+        fullname:Joi.string()
             .required()
     });
     return schema.validate(data);

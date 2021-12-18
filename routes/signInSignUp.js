@@ -28,7 +28,7 @@ router.post('/login',passport.authenticate('local', {
 }));
  
 router.get('/login-faile', controller.loginFailed);
-router.get('/login-success', checkAuthenticated, controller.loginSuccess);
+router.get('/login-success', controller.loginSuccess);
 
 router.get('/matan', checkAuthenticated, controller.s);
 
@@ -38,11 +38,12 @@ module.exports = router;
 
 
 function checkAuthenticated(req, res, next) {
+    console.log(req.session)
     if (req.isAuthenticated()) {
         return next();
     }
     console.log("checkAuthenticated router line 44");
-    res.status(401).json({error: 'the user is not authenticated'})
+    res.status(200).json({error: 'the user is not authenticated'})
 }
   
 // function checkNotAuthenticated(req, res, next) {

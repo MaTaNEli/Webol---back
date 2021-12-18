@@ -13,7 +13,7 @@ function initialize(passport) {
                 return done(null, false);
             }
 
-            if (await bcrypt.compare(password, user.password)){
+            else if (await bcrypt.compare(password, user.password)){
                 console.log("passport line 17")
                 return done(null, user);
             } else {
