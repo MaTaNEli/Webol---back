@@ -64,7 +64,7 @@ exports.logInPost = async (req, res) =>{
 
     let userInfo = {};
     if (req.body.username){
-        console.log("1");  
+        console.log("controller/signinsignup line 67");  
     }
 
     if (!userInfo){
@@ -73,10 +73,10 @@ exports.logInPost = async (req, res) =>{
 
     if (await bcrypt.compare(req.body.password, userInfo.password)){
         const token = await jwt.sign({id: userInfo.id}, process.env.TOKEN_SECRET);
-        console.log("2");
+        console.log("controller/signinsignup line 76");
         res.status(200).header('auth-token', token).json({token});
     } else {
-        console.log("3");
+        console.log("controller/signinsignup line 79");
         res.status(401).json({error: "password incorrect"});
     }
 };

@@ -26,12 +26,12 @@ function initialize(passport) {
 
 
     passport.serializeUser((user, done) => {
-        console.log(user, "im the user from config/passport line 29");
+        console.log(user, "im the user from config/passport line 29 serializeUser");
         done(null, user._id);
     });
 
     passport.deserializeUser((userId, done) => {
-        console.log(userId, "adsvbgfnhgfdsgdvsfdbgbfbfsbsdvsdv")
+        console.log(userId, "im the user from config/passport line 34 deserializeUser")
         User.findById({_id: userId})
             .then((user) => {
                 done(null, user);

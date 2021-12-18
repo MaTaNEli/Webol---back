@@ -10,15 +10,15 @@ const router = express.Router();
  initializePassport(passport);
 
 // Auth Routes
-// router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
-// router.get('/google/callback', passport.authenticate('google', { failureRedirect: '/login-faile' }),
-//   function(req, res) {
-//     // Successful authentication, redirect home.
-//     console.log("10")
-//     res.redirect('/login-success');
-//   }
-// );
+router.get('/google/callback', passport.authenticate('google', { failureRedirect: '/login-faile' }),
+  function(req, res) {
+    // Successful authentication, redirect home.
+    console.log("10 calback line18 in router")
+    res.redirect('/login-success');
+  }
+);
 
 router.post('/register', controller.registerPosts);
 
@@ -28,9 +28,9 @@ router.post('/login',passport.authenticate('local', {
 }));
  
 router.get('/login-faile', controller.loginFailed);
-router.get('/login-success', controller.loginSuccess);
+router.get('/login-success', checkAuthenticated, controller.loginSuccess);
 
-router.get('/matan', checkAuthenticated,controller.s);
+router.get('/matan', checkAuthenticated, controller.s);
 
 router.get('/logout', controller.logout);
 
@@ -41,7 +41,7 @@ function checkAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         return next();
     }
-    console.log("2");
+    console.log("checkAuthenticated router line 44");
     res.status(401).json({error: 'the user is not authenticated'})
 }
   
