@@ -1,14 +1,13 @@
-const bcrypt = require ("bcryptjs");
+const bcrypt = require ('bcryptjs');
 const jwt = require ('jsonwebtoken');
 const User = require('../config/database');
-const { registerValidation, loginValidation } = require ('../validate/registerValidate')
-
-//var qs = require('querystring');
+const validate = require ('../validate/registerValidate')
+const nodemailer = require ('nodemailer');
 
 exports.registerPosts = async (req, res) =>{
     let errMessage = ""
     // Validate the data
-    const { error } = registerValidation(req.body);
+    const { error } = validate.registerValidation(req.body);
 
     //console.log(req.header('auth-token'));
     if (error){
@@ -51,13 +50,12 @@ exports.registerPosts = async (req, res) =>{
     }
 };
 
-
 exports.logInPost = async (req, res) =>{
 
     let errMessage = "";
 
     // Validate the data
-    const { error } = loginValidation(req.body);
+    const { error } = validate.loginValidation(req.body);
 
     //console.log(req.header('auth-token'));
     if (error){
@@ -70,7 +68,6 @@ exports.logInPost = async (req, res) =>{
                 errMessage = "Email or Password are incorrect"
                 return res.status(200).json({error: errMessage})
             }
-
 
             else if (await bcrypt.compare(req.body.password, user.password)){
                 const token = await jwt.sign({id: user.id}, process.env.TOKEN_SECRET);
@@ -105,10 +102,19 @@ exports.googleLogIn = async (req, res) =>{
                 email: req.body.email,
                 fullname: req.body.name
             });
-            await newUser.save().then((user) => console.log("saved the user"));
+
+            const { error } = validate.googleValidation(newUser);
+
+            //console.log(req.header('auth-token'));
+            if (error){
+                return res.json({error: error.details[0].message});
+            }
+
+            await newUser.save().then((user) => console.log("Saved the google user"));
         }
     });
 
+    // Search for user again to get the id for token create
     await User.findOne({email: req.body.email})
         .then(async (user) =>{
             if (!user){
@@ -127,7 +133,58 @@ exports.googleLogIn = async (req, res) =>{
 
 
 
+exports.passwordReset = async (req, res) =>{
+    await User.findOne({email: req.body.email})
+    .then(async (user) => {
+        if (user){
+            const token = await jwt.sign({id: user.id}, process.env.TOKEN_SECRET);
+        
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: 'matanel@edu.hac.ac.il',
+                    pass: 'Mm954871305090'
+                }
+            });
+          
+            const mailOptions = {
+                from: 'matanel@edu.hac.ac.il',
+                to: req.body.email,
+                subject: 'Reset your password',
+                html: `<p>You requested for email verification, kindly use this
+                <a href="http://localhost:3000/resetpass/${token}"> link</a> to verify your email address
+                </p>
+`
+            };
+          
+            await transporter.sendMail(mailOptions, function(error, info){
+                if (error) {
+                    console.log(error);
+                } else {
+                console.log('Email sent: ' + info.response);
+                }
+            });
 
+            res.status(200).json({message:"email send"})
+        }else{
+            res.status(200).json({message:"could not fint the user email"})
+        }
+        
+    })
+    .catch(e => console.log(e, "the error from line 174 in controller/signinsignup"))
+
+    
+};
+
+exports.passUpdate = async (req, res) => {
+
+    console.log(req.user, req.body);
+    await User.findById(req.user.id)
+    .then((user) =>{
+        console.log(user)
+    })
+    res.status(200).json({message: "the password updated successfully"})
+}
 
 exports.s = (req, res) =>{
     console.log(req.user);
@@ -135,5 +192,3 @@ exports.s = (req, res) =>{
     res.status(200).json({user: req.user});
     
 };
-
-

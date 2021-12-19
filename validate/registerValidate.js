@@ -30,5 +30,19 @@ const loginValidation = data => {
     return schema.validate(data);
 };
 
+const googleValidation = data => {
+    const schema = Joi.object({
+        username: Joi.string()
+            .required(),
+        email:Joi.string()
+            .required()
+            .email(),
+        fullname:Joi.string()
+            .required()
+    });
+    return schema.validate(data);
+};
+
+module.exports.googleValidation = googleValidation;
 module.exports.loginValidation = loginValidation;
 module.exports.registerValidation = registerValidation;
