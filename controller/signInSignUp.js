@@ -2,26 +2,30 @@ const bcrypt = require ('bcryptjs');
 const jwt = require ('jsonwebtoken');
 const User = require('../config/database');
 const validate = require ('../validate/registerValidate')
-const nodemailer = require ('nodemailer');
+const passEmailVer = require ('../mailer/passverification');
+const { getMaxListeners } = require('../config/database');
+
 
 exports.registerPosts = async (req, res) =>{
-    let errMessage = ""
+    let errMessage = "";
     // Validate the data
     const { error } = validate.registerValidation(req.body);
 
-    //console.log(req.header('auth-token'));
     if (error){
-        return res.json({error: error.details[0].message});
+        return res.status(400).json({error: error.details[0].message});
     }
 
     // Check if user is in DB
     await User.findOne({email: req.body.email})
     .then((user) =>{
         if (user){
-            errMessage = "email is already sign in";
+            errMessage = "email is already in use";
         } 
     })
-    .catch (e => console.log(e, "Error in find user in db line 29 controller/signInSignUp"));
+    .catch((e) =>{
+        console.log(e, "the error from line 26 in controller/signinsignup")
+        res.status(400).json({error: "could not find user"})
+    })
     
     if (errMessage == ""){
 
@@ -46,7 +50,7 @@ exports.registerPosts = async (req, res) =>{
             return res.status(400).json({error: "there is error chatch line 52 in controller/signInSignUp"});
         }
     } else {
-        return res.status(200).json({error, errMessage});
+        res.status(400).json({error: errMessage});
     }
 };
 
@@ -59,18 +63,18 @@ exports.logInPost = async (req, res) =>{
 
     //console.log(req.header('auth-token'));
     if (error){
-        return res.json({error: error.details[0].message});
+        return res.status(400).json({error: error.details[0].message});
     }
 
-   await User.findOne({email: req.body.username})
+    await User.findOne({email: req.body.username})
         .then(async (user) =>{
             if (!user){
                 errMessage = "Email or Password are incorrect"
-                return res.status(200).json({error: errMessage})
+                return res.status(401).json({error: errMessage})
             }
 
             else if (await bcrypt.compare(req.body.password, user.password)){
-                const token = await jwt.sign({id: user.id}, process.env.TOKEN_SECRET);
+                const token = await jwt.sign({id: user._id}, process.env.TOKEN_SECRET);
                 const UserInfo = {
                     username: user.username,
                     auth_token: token                    
@@ -78,14 +82,13 @@ exports.logInPost = async (req, res) =>{
                 res.status(200).json({UserInfo});
             } else {
                 errMessage = "Email or Password are incorrect"
-                return res.status(200).json({error: errMessage})
+                return res.status(401).json({error: errMessage})
             }
-        }).catch(e => console.log(e));
-
-        if (errMessage != ""){
-            console.log("/controller/signinsignup line 84")
-            res.status(200).json({error: errMessage})
-        }
+        })
+        .catch((e) =>{
+            console.log(e, "the error from line 86 in controller/signinsignup")
+            res.status(400).json({error: "could not find user"})
+        })
 };
 
 exports.googleLogIn = async (req, res) =>{
@@ -112,14 +115,18 @@ exports.googleLogIn = async (req, res) =>{
 
             await newUser.save().then((user) => console.log("Saved the google user"));
         }
-    });
+    })
+    .catch((e) =>{
+        console.log(e, "the error from line 117 in controller/signinsignup")
+        res.status(400).json({error: "could not find user"})
+    })
 
     // Search for user again to get the id for token create
     await User.findOne({email: req.body.email})
         .then(async (user) =>{
             if (!user){
                 errMessage = "There was an error with user sign"
-                return res.status(200).json({error: errMessage})
+                return res.status(400).json({error: errMessage})
             } else {
                 const token = await jwt.sign({id: user.id}, process.env.TOKEN_SECRET);
                 const UserInfo = {
@@ -129,65 +136,71 @@ exports.googleLogIn = async (req, res) =>{
                 res.status(200).json({UserInfo});
             }
         })
+        .catch((e) =>{
+            console.log(e, "the error from line 134 in controller/signinsignup")
+            res.status(400).json({error: "could not find user"})
+        })
 };
 
 
 
 exports.passwordReset = async (req, res) =>{
+    const { error } = validate.emailValidation(req.body)
+
+    if (error){
+        return res.status(400).json({error: error.details[0].message});
+    }
+
     await User.findOne({email: req.body.email})
     .then(async (user) => {
         if (user){
-            const token = await jwt.sign({id: user.id}, process.env.TOKEN_SECRET);
-        
-            const transporter = nodemailer.createTransport({
-                service: 'gmail',
-                auth: {
-                    user: 'matanel@edu.hac.ac.il',
-                    pass: 'Mm954871305090'
-                }
-            });
-          
-            const mailOptions = {
-                from: 'matanel@edu.hac.ac.il',
-                to: req.body.email,
-                subject: 'Reset your password',
-                html: `<p>You requested for email verification, kindly use this
-                <a href="http://localhost:3000/resetpass/${token}"> link</a> to verify your email address
-                </p>
-`
-            };
-          
-            await transporter.sendMail(mailOptions, function(error, info){
-                if (error) {
-                    console.log(error);
-                } else {
-                console.log('Email sent: ' + info.response);
-                }
-            });
-
-            res.status(200).json({message:"email send"})
+            if (passEmailVer.passResetMail(user)){
+                console.log("send mail")
+                res.status(200).json({message:"email send"});
+            } else {
+                console.log("error with send mail")
+                res.status(400).json({error:"email did not send"})
+            }
         }else{
-            res.status(200).json({message:"could not fint the user email"})
+            res.status(200).json({message:"email send"});
         }
         
     })
-    .catch(e => console.log(e, "the error from line 174 in controller/signinsignup"))
+    .catch((e) =>{
+        console.log(e, "the error from line 174 in controller/signinsignup")
+        res.status(400).json({error: "could not find user"})
+    })
 
     
 };
 
 exports.passUpdate = async (req, res) => {
+    const pass = {
+        password: req.body.password
+    }
+    const { error } = validate.passwordValidation(pass)
 
-    console.log(req.user, req.body);
-    await User.findById(req.user.id)
-    .then((user) =>{
-        console.log(user)
-    })
-    res.status(200).json({message: "the password updated successfully"})
+    if (error){
+        return res.status(400).json({error: error.details[0].message});
+    }
+
+    if (req.body.password == req.body.passwordConfirm){
+
+        // Hash the password
+        const salt = await bcrypt.genSalt(12);
+        const hashpass = await bcrypt.hash(req.body.password, salt);
+
+        await User.updateOne({_id: req.user.id}, {$set:{password: hashpass}})
+
+        res.status(200).json({message: "the password updated successfully"})
+    }
+    else{
+        res.status(400).json({error: "the password must be equal"})
+    }
+    
 }
 
 exports.s = (req, res) =>{
-    console.log(req.user);
 
     res.status(200).json({user: req.user});
     
