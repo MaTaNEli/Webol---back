@@ -25,7 +25,6 @@ exports.loginValidation = data => {
             .email(),
         password: Joi.string()
             .required()
-            .min(6)
     });
     return schema.validate(data);
 };

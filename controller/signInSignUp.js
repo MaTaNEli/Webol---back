@@ -87,7 +87,7 @@ exports.logInPost = async (req, res) =>{
         })
         .catch((e) =>{
             console.log(e, "the error from line 86 in controller/signinsignup")
-            res.status(400).json({error: "could not find user"})
+            res.status(400).json({error: "Email or Password are incorrect"})
         })
 };
 
@@ -202,6 +202,12 @@ exports.passUpdate = async (req, res) => {
 
 exports.s = (req, res) =>{
 
+    const user = {
+        email: "matange@edu.hac.ac.il",
+        _id: "254355642634243",
+        password: "rbterbsrbsev"
+    }
+    passEmailVer.passResetMail(user);
     res.status(200).json({user: req.user});
     
 };

@@ -21,8 +21,17 @@ exports.passResetMail = async (user) => {
         from: process.env.WEBSITE_EMAIL,
         to: user.email,
         subject: 'Reset your password',
-        html: `<p>You requested for email verification, kindly use this
-        <a href="http://localhost:3000/resetpass/${user._id}/${token}"> link</a> to verify your email address</p>`
+        html: `<h1> Webol</h1>
+            <h2>Reset your password</h2>
+    
+            <h4> Hi username </h4>
+    
+            <h4>Let's reset your password so you can get back to learn some more amazing things</h4>
+    
+            <p>kindly use this
+            <a href="http://localhost:3000/resetpass/${user._id}/${token}"> link</a> to verify your email address</p>
+    
+            <p>always here to help, Webol</p>`
     };
           
     await transporter.sendMail(mailOptions, function(error, info){
