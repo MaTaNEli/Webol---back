@@ -24,7 +24,7 @@ exports.passResetMail = async (user) => {
         html: `<h1> Webol</h1>
             <h2>Reset your password</h2>
     
-            <h4> Hi username </h4>
+            <h4> Hi ${user.fullname} </h4>
     
             <h4>Let's reset your password so you can get back to learn some more amazing things</h4>
     

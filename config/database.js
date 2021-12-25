@@ -1,25 +1,13 @@
-const mongoose = require('mongoose');
+const { Pool } = require('pg')
 
-// Creates schema for a User
-const UserSchema = new mongoose.Schema({
-    username:{
-        type:String,
-        required:true
-    },
-    password: {
-        type:String,
-        min: 6
-    },
-    email:{
-        type: String,
-        required:true,
-        unique: true
-    },
-    fullname:{
-        type: String,
-        required:true
-    }
+const pool = new Pool({
+    "user": 'postgres',
+    "database": 'webol',
+    "password": 'allober77354hhzxm',
+    "port": 5433,
+    "max": 20,
+    "connectionTimeoutMillis" : 0,
+    "idleTimeoutMillis": 0
 });
 
-// // Expose the connection
-module.exports = mongoose.model('User', UserSchema)
+module.exports = pool;

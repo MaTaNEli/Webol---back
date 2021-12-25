@@ -6,7 +6,6 @@ exports.token = async  (req, res, next) => {
     const token = await req.header('auth_token');
     if (!token) return res.status(401).json('Access Denide');
 
-    console.log(token);
     try{
         const verified = jwt.verify(token, process.env.TOKEN_SECRET);
         console.log("verify")
@@ -44,7 +43,7 @@ exports.resetPassToken = async (req, res, next) => {
                 }  
             }
             else {
-                console.log("could not find the user by it's id");
+                console.log("verify token line 46");
                 res.status(200).json({error: 'Could not find the user'});
             }
         })
@@ -52,7 +51,7 @@ exports.resetPassToken = async (req, res, next) => {
             res.status(400).json({error: "could not find user"})
         })
     } catch {
-        console.log(err, "not verify");
+        console.log(err, "not verify line 51");
         res.status(400).json('Invalid Token')
     }
 };
