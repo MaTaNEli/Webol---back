@@ -6,9 +6,7 @@ const pool = require('../config/database');
 
 
 exports.registerPosts = async (req, res) =>{
-    let errMessage = "";
 
-    console.log(req.body);
     // Validate the data
     const { error } = validate.registerValidation(req.body);
     if (error){
@@ -18,11 +16,11 @@ exports.registerPosts = async (req, res) =>{
     try{
         // Check if user is in DB
         const email = await pool.query(`SELECT email FROM users WHERE email='${req.body.email}'`)
-        const username = await pool.query(`SELECT username FROM users WHERE username='${req.body.username}'`)
 
-        const err = username.rows[0] || email.rows[0];
-        if (err)
-            return res.status(400).json({error: err})
+        if (email.rows[0]) {
+            return res.status(400).json({error: "Email is already exist"})
+        }
+            
     } catch(error){
         console.log("controller/signinsignup line 25", error)
     }
@@ -32,8 +30,8 @@ exports.registerPosts = async (req, res) =>{
     const hashpass = await bcrypt.hash(req.body.password, salt);
 
     // Create query for DB
-    const text = "INSERT INTO users(id, full_name, email, username, password) VALUES(uuid_generate_v4(),$1,$2,$3,$4)";
-    const values = [req.body.full_name, req.body.email , req.body.username, hashpass];
+    const text = "INSERT INTO users(id, full_name, email, password) VALUES(uuid_generate_v4(),$1,$2,$3)";
+    const values = [req.body.full_name, req.body.email , hashpass];
     
     // Save the user in DB
     try{
@@ -46,161 +44,132 @@ exports.registerPosts = async (req, res) =>{
     
 };
 
-// exports.logInPost = async (req, res) =>{
+exports.logInPost = async (req, res) =>{
+    // Validate the data
+    const { error } = validate.loginValidation(req.body);
+    if (error){
+        return res.status(400).json({error: "Email or Password are incorrect"});
+    }
 
-//     let errMessage = "";
+    let user;
+    try{
+        // Check if user is in DB
+        user = await pool.query(`SELECT * FROM users WHERE email='${req.body.email}'`);
+    } catch(err) {
+        console.log("controller/signinsignup line 81", err);
+    }
 
-//     // Validate the data
-//     const { error } = validate.loginValidation(req.body);
-//     if (error){
-//         return res.status(400).json({error: error.details[0].message});
-//     }
+    if(user.rows[0] && await bcrypt.compare(req.body.password, user.rows[0].password)){ 
+        const tokenUser = {
+            id: user.rows[0].id,
+            manualConnect: true
+        }
+        const token = await jwt.sign(tokenUser, process.env.TOKEN_SECRET);
+        const UserInfo = {
+            full_name: user.rows[0].full_name,
+            auth_token: token                    
+        }
+        console.log("User loged in");
+        res.status(200).json({UserInfo});
+    }
+    else{
+        res.status(401).json({error: "Email or Password are incorrect"});
+    }
+};
 
-//     await User.findOne({email: req.body.username})
-//         .then(async (user) =>{
-//             if (!user){
-//                 errMessage = "Email or Password are incorrect"
-//                 return res.status(401).json({error: errMessage})
-//             }
+exports.googleLogIn = async (req, res) =>{
+    let user;
+    // Create a user
+    try{
+        user = await pool.query(`SELECT * FROM users WHERE email='${req.body.email}'`);
+        if(!user.rows[0]){
+            // Save user in DB
+            const text = "INSERT INTO users(id, full_name, email) VALUES(uuid_generate_v4(),$1,$2)";
+            const values = [req.body.name, req.body.email];
+            await pool.query(text,values);
+        };
+    } catch(err) {
+        console.log("controller/signinsignup line 98", err);
+    };
 
-//             else if (await bcrypt.compare(req.body.password, user.password)){
-//                 const tokenUser = {
-//                     id: user._id,
-//                     connect: "menual"
-//                 }
-//                 const token = await jwt.sign(tokenUser, process.env.TOKEN_SECRET);
-//                 const UserInfo = {
-//                     username: user.username,
-//                     auth_token: token                    
-//                 }
-//                 res.status(200).json({UserInfo});
-//             } else {
-//                 errMessage = "Email or Password are incorrect"
-//                 return res.status(401).json({error: errMessage})
-//             }
-//         })
-//         .catch((e) =>{
-//             console.log(e, "the error from line 86 in controller/signinsignup")
-//             res.status(400).json({error: "Email or Password are incorrect"})
-//         })
-// };
+    if(!user.rows[0]){
+        try{
+            user = await pool.query(`SELECT * FROM users WHERE email='${req.body.email}'`);
+        } catch(err) {
+            console.log("controller/signinsignup line 111", err);
+        }
+    }
 
-// exports.googleLogIn = async (req, res) =>{
-//     let errMessage = "";
-//     console.log(req.body);
-//     // Create a user
-//     await User.findOne({email: req.body.email})
-//     .then(async (user) => {
-//         if (!user){
-//             const newUser = new User({
-//                 username: req.body.name,
-//                 email: req.body.email,
-//                 fullname: req.body.name
-//             });
-
-//             // Validate the data
-//             const { error } = validate.googleValidation(newUser);
-//             if (error){
-//                 return res.json({error: error.details[0].message});
-//             }
-
-//             await newUser.save()
-//             .then((user) => console.log("Saved the google user"))
-//             .catch((e) =>{
-//                 console.log(e, "the error from line 115 in controller/signinsignup")
-//                 res.status(400).json({error: "could not save user"})
-//             })
-//         }
-//     })
-//     .catch((e) =>{
-//         console.log(e, "the error from line 117 in controller/signinsignup")
-//         res.status(400).json({error: "could not find user"})
-//     })
-
-//     // Search for user again to get the id for token create
-//     await User.findOne({email: req.body.email})
-//         .then(async (user) =>{
-//             if (!user){
-//                 errMessage = "There was an error with user sign"
-//                 return res.status(400).json({error: errMessage})
-//             } else {
-//                 const tokenUser = {
-//                     id: user._id,
-//                     connect: "google"
-//                 }
-//                 const token = await jwt.sign(tokenUser, process.env.TOKEN_SECRET);
-//                 const UserInfo = {
-//                     username: user.username,
-//                     auth_token: token                    
-//                 }
-//                 res.status(200).json({UserInfo});
-//             }
-//         })
-//         .catch((e) =>{
-//             console.log(e, "the error from line 134 in controller/signinsignup")
-//             res.status(400).json({error: "could not find user"})
-//         })
-// };
-
-
-
-// exports.passwordReset = async (req, res) =>{
-
-//     // Validate the data
-//     const { error } = validate.emailValidation(req.body)
-//     if (error){
-//         return res.status(400).json({error: error.details[0].message});
-//     }
-
-//     await User.findOne({email: req.body.email})
-//     .then(async (user) => {
-//         if (user){
-//             if (passEmailVer.passResetMail(user)){
-//                 console.log("send mail")
-//                 res.status(200).json({message:"email send"});
-//             } else {
-//                 console.log("error with send mail")
-//                 res.status(400).json({error:"email did not send"})
-//             }
-//         }else{
-//             res.status(200).json({message:"email send"});
-//         }
+    if(user.rows[0]){
+        const tokenUser = {
+            id: user.rows[0].id,
+            manualConnect: false
+        };
+        const token = await jwt.sign(tokenUser, process.env.TOKEN_SECRET);
+        const UserInfo = {
+            full_name: user.full_name,
+            auth_token: token                    
+        };
+        console.log("User loged in with google");
         
-//     })
-//     .catch((e) =>{
-//         console.log(e, "the error from line 174 in controller/signinsignup")
-//         res.status(400).json({error: "could not find user"})
-//     })
+        res.status(200).json({UserInfo});
+    }
+    else{
+        res.status(400).json({error: "There war a poblem with the google sign"})
+    }
+};
 
-    
-// };
+exports.passwordReset = async (req, res) =>{
 
-// exports.passUpdate = async (req, res) => {
-//     const pass = {
-//         password: req.body.password
-//     }
+    // Validate the data
+    const { error } = validate.emailValidation(req.body)
+    if (error){
+        return res.status(400).json({error: "Email is not valid"});
+    }
 
-//     // Validate the data
-//     const { error } = validate.passwordValidation(pass)
-//     if (error){
-//         return res.status(400).json({error: error.details[0].message});
-//     }
+    let user;
+    try{
+        user = await pool.query(`SELECT * FROM users WHERE email='${req.body.email}'`);
+    } catch(err) {
+        console.log("controller/signinsignup line 111", err);
+    }
 
-//     if (req.body.password == req.body.passwordConfirm){
+    if (user.rows[0] && passEmailVer.passResetMail(user.rows[0])){
+        res.status(200).json({message:"Email send"});
+    } else {
+        res.status(400).json({error:"User did not found"})
+    }    
+};
 
-//         // Hash the password
-//         const salt = await bcrypt.genSalt(12);
-//         const hashpass = await bcrypt.hash(req.body.password, salt);
+exports.passUpdate = async (req, res) => {
+    const pass = {
+        password: req.body.password
+    }
 
-//         await User.updateOne({_id: req.user.id}, {$set:{password: hashpass}})
+    // Validate the data
+    const { error } = validate.passwordValidation(pass)
+    console.log("1");
+    if (error){
+        return res.status(400).json({error: error.details[0].message});
+    }
 
-//         res.status(200).json({message: "the password updated successfully"})
-//     }
-//     else{
-//         res.status(400).json({error: "the password must be equal"})
-//     }
-    
-// }
+    if (req.body.password == req.body.passwordConfirm){
+
+        // Hash the password
+        const salt = await bcrypt.genSalt(12);
+        const hashpass = await bcrypt.hash(req.body.password, salt);
+
+        try{
+            await pool.query(`UPDATE users SET password = '${hashpass}' WHERE id = '${req.body.id}'`);
+            res.status(200).json({message: "The password updated successfully"})
+        } catch(err) {
+            console.log("controller/signinsignup line 165", err);
+        }
+    }
+    else{
+        res.status(400).json({error: "The password must be equal"})
+    }   
+}
 
 // exports.s = (req, res) =>{
 //     res.status(200).json({user: req.user});

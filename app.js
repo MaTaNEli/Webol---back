@@ -1,7 +1,5 @@
 const express = require ('express');
-const mongoose = require('mongoose');
 const cors = require ('cors');
-
 
 // Access to veriables set in the .env file via 'process.env.VERIABLE_NAME'
 require ('dotenv').config();
@@ -10,7 +8,6 @@ require ('dotenv').config();
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
-
 app.use(cors({credentials: true, origin: 'http://localhost:3000'}));
 
 
@@ -22,25 +19,19 @@ app.use(cors({credentials: true, origin: 'http://localhost:3000'}));
 // });
 
 
-// app.use((req, res, next) => {
-//     console.log(req.session, "session");
-//     console.log(req.user, "user");
-//     next();
-// });
-
-
 // Fetch all the routes for the application
 const signInSignUp = require('./routes/signInSignUp');
 
-// function errHandler(err, req, res, next){
-//     res.json({err: err})
-// }
+function errHandler(err, req, res, next){
+    console.log("in app.js line 36")
+    res.json({error: err})
+}
 
 // Routes
 app.use('/', signInSignUp);
 
-// Get all the err without crash
-//app.use(errHandler);
+//Get all the err without crash
+app.use(errHandler);
 
 // Server listen on http//localhost:3000
 app.listen(3000, () => console.log('Server is running'));

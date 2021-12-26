@@ -5,7 +5,7 @@ exports.passResetMail = async (user) => {
     const newSecret = process.env.TOKEN_SECRET + user.password;
     const userInfo = {
         email: user.email,
-        id: user._id
+        id: user.id
     }
     const token = await jwt.sign(userInfo, newSecret, { expiresIn: '10m'});
         
@@ -24,12 +24,12 @@ exports.passResetMail = async (user) => {
         html: `<h1> Webol</h1>
             <h2>Reset your password</h2>
     
-            <h4> Hi ${user.fullname} </h4>
+            <h4> Hi ${user.full_name} </h4>
     
             <h4>Let's reset your password so you can get back to learn some more amazing things</h4>
     
             <p>kindly use this
-            <a href="http://localhost:3000/resetpass/${user._id}/${token}"> link</a> to verify your email address</p>
+            <a href="http://localhost:3000/resetpass/${user.id}/${token}"> link</a> to verify your email address</p>
     
             <p>always here to help, Webol</p>`
     };
