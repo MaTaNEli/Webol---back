@@ -8,7 +8,7 @@ const pool = require('../config/database');
 exports.registerPosts = async (req, res) =>{
     let errMessage = "";
 
-    console.log("here")
+    console.log(req.body);
     // Validate the data
     const { error } = validate.registerValidation(req.body);
     if (error){
@@ -30,13 +30,15 @@ exports.registerPosts = async (req, res) =>{
     // Hash the password
     const salt = await bcrypt.genSalt(12);
     const hashpass = await bcrypt.hash(req.body.password, salt);
+
+    // Create query for DB
     const text = "INSERT INTO users(id, full_name, email, username, password) VALUES(uuid_generate_v4(),$1,$2,$3,$4)";
     const values = [req.body.full_name, req.body.email , req.body.username, hashpass];
     
     // Save the user in DB
     try{
         await pool.query(text,values);
-        console.log("new user");
+        console.log("New user registered");
         res.status(200).json({message: "Sign up successfully"});
     } catch(err) {
         console.log("controller/signinsignup line 42", err)
