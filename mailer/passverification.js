@@ -6,7 +6,7 @@ exports.passResetMail = async (user) => {
     const userInfo = {
         email: user.email,
         id: user.id
-    }
+    };
     const token = await jwt.sign(userInfo, newSecret, { expiresIn: '10m'});
         
     const transporter = nodemailer.createTransport({

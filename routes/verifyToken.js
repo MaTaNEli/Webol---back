@@ -11,7 +11,7 @@ exports.token = async  (req, res, next) => {
         next();
 
     } catch (err) {
-        res.status(401).json({error: 'Access Denide'})
+        res.status(401).json({error: 'Access Denide'});
     }
 }
 
@@ -29,7 +29,7 @@ exports.resetPassToken = async (req, res, next) => {
     }
 
     if (user.rows[0]){
-        const newSecret = process.env.TOKEN_SECRET + user.rows[0].password
+        const newSecret = process.env.TOKEN_SECRET + user.rows[0].password;
         try{
             const userInfo = jwt.verify(token, newSecret);
             if(userInfo){

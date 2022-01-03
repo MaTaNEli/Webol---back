@@ -8,8 +8,8 @@ require ('dotenv').config();
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
-app.use(cors({credentials: true, origin: 'http://localhost:3000'}));
-
+//app.use(cors({credentials: true, origin: 'http://localhost:3000'}));
+app.use(cors({credentials: true, origin: '*'}));
 
 // app.use((req, res, next) =>{
 //     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -21,14 +21,16 @@ app.use(cors({credentials: true, origin: 'http://localhost:3000'}));
 
 // Fetch all the routes for the application
 const signInSignUp = require('./routes/signInSignUp');
+const s3 = require('./routes/s3');
 
 function errHandler(err, req, res, next){
-    console.log("in app.js line 36")
-    res.json({error: err})
+    console.log("in app.js line 36");
+    res.json({error: err});
 }
 
 // Routes
 app.use('/', signInSignUp);
+app.use('/s3', s3);
 
 //Get all the err without crash
 app.use(errHandler);
