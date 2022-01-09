@@ -14,10 +14,14 @@ exports.registerPosts = async (req, res) =>{
     
     try{
         // Check if user is in DB
-        const email = await pool.query(`SELECT email FROM users WHERE email='${req.body.email}'`);
+        const email = await pool.query(`SELECT email, username FROM users WHERE email='${req.body.email}' OR username='${req.body.username}'`);
 
         if (email.rows[0]) {
-            return res.status(400).json({error: "Email is already exist"});
+            console.log(email.rows);
+            if(email.rows[0].email == req.body.email)
+                return res.status(400).json({error: "Email is already exist"});
+            else
+                return res.status(400).json({error: "Username is already exist"});
         }
             
     } catch(error){
@@ -29,8 +33,8 @@ exports.registerPosts = async (req, res) =>{
     const hashpass = await bcrypt.hash(req.body.password, salt);
 
     // Create query for DB
-    const text = "INSERT INTO users(id, full_name, email, password) VALUES(uuid_generate_v4(),$1,$2,$3)";
-    const values = [req.body.full_name, req.body.email , hashpass];
+    const text = "INSERT INTO users(id, full_name, email, username, password) VALUES(uuid_generate_v4(),$1,$2,$3,$4)";
+    const values = [req.body.full_name, req.body.email, req.body.username, hashpass];
     
     // Save the user in DB
     try{
@@ -53,7 +57,7 @@ exports.logInPost = async (req, res) =>{
     let user;
     try{
         // Check if user is in DB
-        user = await pool.query(`SELECT * FROM users WHERE email='${req.body.email}'`);
+        user = await pool.query(`SELECT * FROM users WHERE email='${req.body.username}' OR username='${req.body.username}'`);
     } catch(err) {
         console.log("controller/signinsignup line 81", err);
     }
@@ -66,7 +70,7 @@ exports.logInPost = async (req, res) =>{
 
         const token = jwt.sign(tokenUser, process.env.TOKEN_SECRET);
         const UserInfo = {
-            full_name: user.rows[0].full_name,
+            username: user.rows[0].username,
             auth_token: token                    
         }
         console.log("User loged in");
@@ -84,6 +88,8 @@ exports.googleLogIn = async (req, res) =>{
         // request id insted of all line
         user = await pool.query(`SELECT * FROM users WHERE email='${req.body.email}'`);
         if(!user.rows[0]){
+            // Generate username
+            
             // Save user in DB
             const text = "INSERT INTO users(id, full_name, email) VALUES(uuid_generate_v4(),$1,$2)";
             const values = [req.body.name, req.body.email];
@@ -176,3 +182,15 @@ exports.passUpdate = async (req, res) => {
 //     res.status(200).json({user: req.user});
     
 // };
+//===================================================================
+const crypto = require('crypto');
+const { promisify } = require('util');
+const randomBytes = promisify(crypto.randomBytes);
+
+// generate random string by hex
+exports.m = async (req, res) =>{
+        let user = []
+        const rawBytes = await randomBytes(5)
+        const imageName = rawBytes.toString('hex')
+        res.status(201).json({answer: imageName})
+};

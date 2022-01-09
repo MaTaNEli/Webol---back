@@ -2,8 +2,8 @@ const jwt = require ('jsonwebtoken');
 const pool = require('../config/database');
 
 
-exports.token = async  (req, res, next) => {
-    const token = await req.header('auth_token');
+exports.token =  (req, res, next) => {
+    const token = req.header('auth_token');
     if (!token) return res.status(401).json({error: 'Access Denide'});
 
     try{
@@ -16,7 +16,7 @@ exports.token = async  (req, res, next) => {
 }
 
 exports.resetPassToken = async (req, res, next) => {
-    const token = await req.header('mail_token');
+    const token = req.header('mail_token');
     if (!token){
         return res.status(401).json({error: "Access Denied"});
     } 

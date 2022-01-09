@@ -21,6 +21,7 @@ app.use(cors({credentials: true, origin: '*'}));
 
 // Fetch all the routes for the application
 const signInSignUp = require('./routes/signInSignUp');
+const userRequest = require('./routes/userRequest');
 const s3 = require('./routes/s3');
 
 function errHandler(err, req, res, next){
@@ -30,6 +31,7 @@ function errHandler(err, req, res, next){
 
 // Routes
 app.use('/', signInSignUp);
+app.use('/user', userRequest);
 app.use('/s3', s3);
 
 //Get all the err without crash

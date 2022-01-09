@@ -10,7 +10,8 @@ router.post('/googlelogin', controller.googleLogIn);
 router.post('/resetpass', controller.passwordReset);
 router.post('/updatenewpass', verify.resetPassToken, controller.passUpdate);
 
+
 // ----------- Auth Get Routes -----------
-//router.get('/matan', verify.token, controller.s);
+//router.get('/r', controller.m);
 
 module.exports = router;
