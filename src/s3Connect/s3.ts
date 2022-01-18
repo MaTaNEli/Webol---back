@@ -1,6 +1,6 @@
-const aws = require('aws-sdk');
-const crypto = require('crypto');
-const { promisify } = require('util');
+import aws from 'aws-sdk';
+import crypto from 'crypto';
+import { promisify } from 'util';
 const randomBytes = promisify(crypto.randomBytes);
 
 
@@ -16,13 +16,13 @@ const s3 = new aws.S3({
     signatureVersion: 'v4'
 });
 
-exports.generateUploadURL = async () => {
+export async function generateUploadURL(id: string) {
     const rawBytes = await randomBytes(16)
     const imageName = rawBytes.toString('hex')
   
     const params = ({
       Bucket: bucketName,
-      Key: imageName,
+      Key: `${id}/${imageName}`,
       Expires: 60
     })
     

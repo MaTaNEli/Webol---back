@@ -1,6 +1,8 @@
-const express = require('express');
-const controller = require('../controller/signInSignUp');
-const verify = require ('./verifyToken');
+
+import * as express from 'express';
+import * as controller from '../controller/signInSignUp';
+import * as verify from './verifyToken';
+
 const router = express.Router();
 
 // ----------- Auth Post Routes -----------
@@ -10,8 +12,7 @@ router.post('/googlelogin', controller.googleLogIn);
 router.post('/resetpass', controller.passwordReset);
 router.post('/updatenewpass', verify.resetPassToken, controller.passUpdate);
 
-
 // ----------- Auth Get Routes -----------
-//router.get('/r', controller.m);
 
-module.exports = router;
+export default router;
+

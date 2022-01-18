@@ -1,8 +1,8 @@
-const Joi = require('@hapi/joi');
+import Joi from '@hapi/joi';
+import { UserInput } from '../types';
 
-// Register validation
 
-exports.registerValidation = data => {
+export function registerValidation(data: UserInput) {
     const schema = Joi.object({
         password: Joi.string()
             .required()
@@ -10,7 +10,7 @@ exports.registerValidation = data => {
         email:Joi.string()
             .required()
             .email(),
-        full_name:Joi.string()
+        fullName:Joi.string()
             .required(),
         username:Joi.string()
             .required()
@@ -18,7 +18,7 @@ exports.registerValidation = data => {
     return schema.validate(data);
 };
 
-exports.loginValidation = data => {
+export function loginValidation(data: Pick<UserInput, 'username'|'password'>) {
     const schema = Joi.object({
         username: Joi.string()
             .required(),
@@ -29,7 +29,7 @@ exports.loginValidation = data => {
     return schema.validate(data);
 };
 
-exports.passwordValidation = data => {
+export function passwordValidation(data: { password: string }) {
     const schema = Joi.object({
         password: Joi.string()
             .required()
@@ -39,7 +39,7 @@ exports.passwordValidation = data => {
 };
 
 
-exports.emailValidation = data => {
+export function emailValidation(data: { email: string }) {
     const schema = Joi.object({
         email:Joi.string()
             .required()

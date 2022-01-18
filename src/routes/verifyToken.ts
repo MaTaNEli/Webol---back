@@ -1,13 +1,14 @@
-const jwt = require ('jsonwebtoken');
-const pool = require('../config/database');
+import jwt from 'jsonwebtoken';
+import { Request, Response, NextFunction } from 'express';
+import User from '../entity/user';
 
 
-exports.token =  (req, res, next) => {
+export function token(req: Request, res: Response, next: NextFunction) {
     const token = req.header('auth_token');
     if (!token) return res.status(401).json({error: 'Access Denide'});
 
     try{
-        req.user = jwt.verify(token, process.env.TOKEN_SECRET);
+        req['user'] = jwt.verify(token, process.env.TOKEN_SECRET);
         next();
 
     } catch (err) {
@@ -15,25 +16,26 @@ exports.token =  (req, res, next) => {
     }
 }
 
-exports.resetPassToken = async (req, res, next) => {
+export async function resetPassToken(req: Request, res: Response, next: NextFunction) {
     const token = req.header('mail_token');
     if (!token){
         return res.status(401).json({error: "Access Denied"});
     } 
-    let user;
+    let user: User;
 
     try{
-        user = await pool.query(`SELECT * FROM users WHERE id='${req.body.id}'`);
+        user = await User.findOne(req.body.id);
     } catch(err) {
         console.log("verify token line 28", err);
     }
 
-    if (user.rows[0]){
-        const newSecret = process.env.TOKEN_SECRET + user.rows[0].password;
+    console.log(user, "the user from verify line 32");
+    if (user){
+        const newSecret = process.env.TOKEN_SECRET + user.password;
         try{
             const userInfo = jwt.verify(token, newSecret);
             if(userInfo){
-                req.user = userInfo;
+                req['user'] = userInfo;
                 next();
             }
             else{

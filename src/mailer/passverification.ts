@@ -1,7 +1,9 @@
-const nodemailer = require ('nodemailer');
-const jwt = require ('jsonwebtoken');
+import nodemailer from 'nodemailer';
+import jwt from 'jsonwebtoken';
+import { UserInput } from '../types';
 
-exports.passResetMail = async (user) => {
+
+export async function passResetMail(user: UserInput & { id: string }) {
     const newSecret = process.env.TOKEN_SECRET + user.password;
     const userInfo = {
         email: user.email,
@@ -24,7 +26,7 @@ exports.passResetMail = async (user) => {
         html: `<h1> Webol</h1>
             <h2>Reset your password</h2>
     
-            <h4> Hi ${user.full_name} </h4>
+            <h4> Hi ${user.fullName} </h4>
     
             <h4>Let's reset your password so you can get back to learn some more amazing things</h4>
     

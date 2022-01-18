@@ -1,8 +1,12 @@
-const express = require ('express');
-const cors = require ('cors');
+import dotenv from 'dotenv';
+import 'reflect-metadata'
+import express, { NextFunction } from 'express';
+import cors from 'cors';
+import { initStorage } from './storage';
+import User from './entity/user';
 
 // Access to veriables set in the .env file via 'process.env.VERIABLE_NAME'
-require ('dotenv').config();
+dotenv.config();
 
 // Creat the Express application
 const app = express();
@@ -11,21 +15,13 @@ app.use(express.urlencoded({extended: true}));
 //app.use(cors({credentials: true, origin: 'http://localhost:3000'}));
 app.use(cors({credentials: true, origin: '*'}));
 
-// app.use((req, res, next) =>{
-//     res.setHeader('Access-Control-Allow-Origin', '*');
-//     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
-//     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-//     next();
-// });
-
-
 // Fetch all the routes for the application
-const signInSignUp = require('./routes/signInSignUp');
-const userRequest = require('./routes/userRequest');
-const s3 = require('./routes/s3');
+import signInSignUp from './routes/signInSignUp';
+import userRequest from './routes/userRequest';
+import s3 from './routes/s3';
 
 function errHandler(err, req, res, next){
-    console.log("in app.js line 36");
+    console.log("in app.js line 28");
     res.json({error: err});
 }
 
@@ -38,4 +34,7 @@ app.use('/s3', s3);
 app.use(errHandler);
 
 // Server listen on http//localhost:3000
-app.listen(3000, () => console.log('Server is running'));
+(async () => {
+    await initStorage();
+    app.listen(3000, () => console.log('Server is running'));
+})();
