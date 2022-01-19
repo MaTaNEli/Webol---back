@@ -1,0 +1,11 @@
+{
+    "watch": ["src"],
+    "ext": "ts",
+    "exec": "ts-node ./src/app.ts",
+    "env": {
+       "TS_NODE_TRANSPILE_ONLY": true,
+       "TS_NODE_FILES": true,
+       "NODE_ENV": "dev",
+       "_DEV_": true
+     }
+  }

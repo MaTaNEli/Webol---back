@@ -44,8 +44,9 @@ export async function registerPosts(req: Request, res: Response){
     user.email = email;
     user.username = username;
     user.password = hashpass;
-    user.profileImage = process.env.PROFILE_IMAGE
-
+    user.profileImage = process.env.PROFILE_IMAGE;
+    user.themeImage = process.env.THEME_IMAGE;
+    user.media = 0;
 
     // Save the user in DB
     try{
@@ -126,13 +127,15 @@ export async function googleLogIn(req: Request, res: Response){
             user.fullName = name;
             user.email = email;
             user.username = username;
+            user.profileImage = process.env.PROFILE_IMAGE;
+            user.themeImage = process.env.THEME_IMAGE;
+            user.media = 0;
             await user.save();
         };
     } catch(err) {
         console.log("controller/signinsignup line 98", err);
     };
 
-   
     if(!user){
         try{
             // request id insted of all line
@@ -140,18 +143,12 @@ export async function googleLogIn(req: Request, res: Response){
                 where: [
                     { email: req.body.email }
                 ],
-                select: ['id', 'fullName', 'email', 'username']
-            });
-            user = await User.findOne({ 
-                where: [
-                    { email: req.body.email }
-                ],
-                select: ['id', 'fullName', 'email', 'username']
+                select: ['id', 'username']
             });
         } catch(err) {
             console.log("controller/signinsignup line 111", err);
         }
-    }
+    };
 
     if(user){
         const tokenUser = {
@@ -168,7 +165,7 @@ export async function googleLogIn(req: Request, res: Response){
         res.status(200).json({UserInfo});
     }
     else{
-        res.status(400).json({error: "There war a poblem with the google sign"});
+        res.status(404).send();
     }
 };
 
@@ -193,7 +190,6 @@ export async function passwordReset(req: Request, res: Response){
         console.log("controller/signinsignup line 111", err);
     }
 
-    console.log(user)
     if (user && passEmailVer.passResetMail(user)){
         res.status(200).json({message:"Email send"});
     } else {

@@ -1,12 +1,9 @@
 import dotenv from 'dotenv';
+dotenv.config();
 import 'reflect-metadata'
 import express, { NextFunction } from 'express';
 import cors from 'cors';
 import { initStorage } from './storage';
-import User from './entity/user';
-
-// Access to veriables set in the .env file via 'process.env.VERIABLE_NAME'
-dotenv.config();
 
 // Creat the Express application
 const app = express();

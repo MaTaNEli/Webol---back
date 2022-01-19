@@ -8,6 +8,6 @@ const router = express.Router();
 router.post('/userimage/:image', verify.token, controller.postUserImage);
 
 // ----------- Auth Get Routes -----------
-router.get('/userimage/:image', verify.token, controller.getUserImage);
+router.get('/:username', controller.getUserPage);
 
 export default router;

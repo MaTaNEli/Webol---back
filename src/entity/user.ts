@@ -15,12 +15,21 @@ export default class User extends BaseEntity {
     @Column({ unique: true })
     username: string;
 
-    @Column({ nullable: true })
+    @Column()
     profileImage: string;
 
-    @Column({ nullable: true })
+    @Column()
     themeImage: string;
 
     @Column({ nullable: true })
     password: string;
-}
+
+    @Column({ nullable: true })
+    role: string;
+
+    @Column()
+    media: number;
+
+    @Column({ nullable: true })
+    bio: string;
+};
