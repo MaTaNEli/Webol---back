@@ -1,7 +1,6 @@
 import Joi from '@hapi/joi';
 import { UserInput } from '../types';
 
-
 export function registerValidation(data: UserInput) {
     const schema = Joi.object({
         password: Joi.string()
@@ -37,7 +36,6 @@ export function passwordValidation(data: { password: string }) {
     });
     return schema.validate(data);
 };
-
 
 export function emailValidation(data: { email: string }) {
     const schema = Joi.object({

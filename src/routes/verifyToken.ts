@@ -3,16 +3,33 @@ import { Request, Response, NextFunction } from 'express';
 import User from '../entity/user';
 
 
-export function token(req: Request, res: Response, next: NextFunction) {
+export function admin(req: Request, res: Response, next: NextFunction) {
     const token = req.header('auth_token');
     if (!token) return res.status(401).json({error: 'Access Denide'});
 
     try{
         req['user'] = jwt.verify(token, process.env.TOKEN_SECRET);
-        next();
+        if(req['user'].username == req.params.username)
+            next();
+        else
+            res.status(401).json({error: 'Access Denide'});
 
     } catch (err) {
         res.status(401).json({error: 'Access Denide'});
+    }
+}
+
+export function connect(req: Request, res: Response, next: NextFunction) {
+    const token = req.header('auth_token');
+    console.log(token)
+    if (!token){
+        console.log(token)
+        console.log(1)
+        res.status(401).json({error: 'Access Denide'});
+    } else {
+        console.log(token)
+        console.log(2)
+        next();
     }
 }
 

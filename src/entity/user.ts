@@ -32,4 +32,5 @@ export default class User extends BaseEntity {
 
     @Column({ nullable: true })
     bio: string;
+
 };

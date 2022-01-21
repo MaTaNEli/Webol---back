@@ -1,13 +1,11 @@
-import { BaseEntity, Column, Entity, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, ManyToOne } from "typeorm";
+import User from './user';
 
 @Entity("post")
 export default class Post extends BaseEntity {
     
-    @PrimaryColumn()
+    @PrimaryGeneratedColumn()
     id: string;
-
-    @Column()
-    idOfUser: string;
 
     @Column({ type: 'date' })
     createdAt: string;
@@ -17,4 +15,7 @@ export default class Post extends BaseEntity {
 
     @Column({ nullable: true })
     url: string;
+
+    @ManyToOne(() => User, user => user.id)
+    user: User;
 };

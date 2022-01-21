@@ -37,16 +37,10 @@ export async function registerPosts(req: Request, res: Response){
     const salt = await bcrypt.genSalt(12);
     const hashpass = await bcrypt.hash(req.body.password, salt);
 
-    // Create query for DB
+    // Create user for DB
     const { fullName, email, username } = req.body;
-    const user = new User();
-    user.fullName = fullName;
-    user.email = email;
-    user.username = username;
+    const user = createUser(fullName, email, username);
     user.password = hashpass;
-    user.profileImage = process.env.PROFILE_IMAGE;
-    user.themeImage = process.env.THEME_IMAGE;
-    user.media = 0;
 
     // Save the user in DB
     try{
@@ -54,7 +48,7 @@ export async function registerPosts(req: Request, res: Response){
         console.log("New user registered");
         res.status(200).json({message: "Sign up successfully"});
     } catch(err) {
-        console.log("controller/signinsignup line 42", err);
+        console.log("controller/signinsignup line 57", err);
     } 
     
 };
@@ -73,23 +67,21 @@ export async function logInPost(req: Request, res: Response){
             where: [
                 { email: req.body.username },
                 { username: req.body.username }
-            ]});
+            ],
+            select: ['id', 'password', 'username'] 
+        });
     } catch(err) {
         console.log("controller/signinsignup line 81", err);
     }
 
-    if(result && await bcrypt.compare(req.body.password, result.password)){ 
-        const tokenUser = {
-            id: result.id,
-            username: result.username
-        };
-
-        const token = jwt.sign(tokenUser, process.env.TOKEN_SECRET);
+    if(result && await bcrypt.compare(req.body.password, result.password)){
+        const token = createToken(result.id, result.username)
+        
         const UserInfo = {
             username: result.username,
             auth_token: token                    
         }
-        console.log("User loged in");
+        console.log("User login");
         res.status(200).json({UserInfo});
     }
     else{
@@ -98,6 +90,7 @@ export async function logInPost(req: Request, res: Response){
 };
 
 export async function googleLogIn(req: Request, res: Response){
+    console.log(req.body)
     let user: User;
     // Create a user
     try{
@@ -109,27 +102,11 @@ export async function googleLogIn(req: Request, res: Response){
         });
         if(!user){
             // Generate username
-            let username: string;
-            let tempUser: Pick<User, 'username'>;
-            do {                
-                username = genUsername.generateFromEmail(req.body.email, 3);
-                tempUser = await User.findOne({
-                    where:[
-                        {username: username}
-                    ],
-                    select: ['username']
-                })
-            } while (tempUser);
+            const username = await userNameGenerator(req.body.email);
 
             // Save user in DB
             const { name, email } = req.body;
-            const user = new User();
-            user.fullName = name;
-            user.email = email;
-            user.username = username;
-            user.profileImage = process.env.PROFILE_IMAGE;
-            user.themeImage = process.env.THEME_IMAGE;
-            user.media = 0;
+            const user = createUser(name, email, username);
             await user.save();
         };
     } catch(err) {
@@ -138,7 +115,6 @@ export async function googleLogIn(req: Request, res: Response){
 
     if(!user){
         try{
-            // request id insted of all line
             user = await User.findOne({ 
                 where: [
                     { email: req.body.email }
@@ -151,16 +127,12 @@ export async function googleLogIn(req: Request, res: Response){
     };
 
     if(user){
-        const tokenUser = {
-            id: user.id,
-            username: user.username
-        };
-        const token = jwt.sign(tokenUser, process.env.TOKEN_SECRET);
+        const token = createToken(user.id, user.username)
         const UserInfo = {
-            fullName: user.username,
+            username: user.username,
             auth_token: token                    
         };
-        console.log("User loged in with google");
+        console.log("Google login");
         
         res.status(200).json({UserInfo});
     }
@@ -224,4 +196,39 @@ export async function passUpdate(req: Request, res: Response){
     else{
         res.status(400).json({error: "The password must be equal"});
     }   
+};
+
+async function userNameGenerator(email: string){
+    let username: string;
+    let tempUser: Pick<User, 'username'>;
+    do {                
+        username = genUsername.generateFromEmail(email, 3);
+        tempUser = await User.findOne({
+            where:[
+                {username: username}
+            ],
+            select: ['username']
+        })
+    } while (tempUser);
+    return username;
+};
+
+function createUser(fullName: string, email: string, username: string){
+    const user = new User();
+    user.fullName = fullName;
+    user.email = email;
+    user.username = username;
+    user.profileImage = process.env.PROFILE_IMAGE;
+    user.themeImage = process.env.THEME_IMAGE;
+    user.media = 0;
+    return user;
+};
+
+function createToken(id: string, username: string){
+    const tokenUser = {
+        id: id,
+        username: username
+    };
+
+    return (jwt.sign(tokenUser, process.env.TOKEN_SECRET));
 };

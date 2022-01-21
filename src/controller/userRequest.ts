@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import User from '../entity/user';
+import Post from '../entity/post'
 
 export async function postUserImage(req: Request, res: Response){
     try{
@@ -19,7 +20,6 @@ export async function getUserPage(req: Request, res: Response){
             ],
             select: ['fullName', 'profileImage', 'themeImage', 'role', 'media', 'bio']
         });
-        console.log(user);
         if(user)
             res.status(201).json(user);
         else
@@ -28,4 +28,16 @@ export async function getUserPage(req: Request, res: Response){
         console.log("controller/user request line 40", err);
         res.status(400).json({error: "could not find user"});
     }
+};
+
+export async function addPost(req: Request, res: Response) {
+    const today = new Date();
+    const date = today.getFullYear()+'/'+(today.getMonth()+1)+'/'+today.getDate();
+    const post = new Post;
+    post.createdAt = date;
+    post.description = req.body.description;
+    post.url = req.body.url;
+    post.user = req['user'].id;
+    await post.save();
+    res.send()
 };
