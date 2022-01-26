@@ -21,10 +21,10 @@ export function admin(req: Request, res: Response, next: NextFunction) {
 
 export function connect(req: Request, res: Response, next: NextFunction) {
     const token = req.header('auth_token');
-    console.log(token)
+    console.log(token);
     if (!token){
-        console.log(token)
-        console.log(1)
+        console.log(token);
+        console.log(1);
         res.status(401).json({error: 'Access Denide'});
     } else {
         console.log(token)
