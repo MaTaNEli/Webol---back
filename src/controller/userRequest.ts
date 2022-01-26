@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import User from '../entity/user';
-import Post from '../entity/post'
+import Post from '../entity/post';
 
 export async function postUserImage(req: Request, res: Response){
     try{
