@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import 'reflect-metadata'
-import express, { NextFunction } from 'express';
+import express, { NextFunction, Response, Request } from 'express';
 import cors from 'cors';
 import { initStorage } from './storage';
 
@@ -17,9 +17,8 @@ import signInSignUp from './routes/signInSignUp';
 import userRequest from './routes/userRequest';
 import s3 from './routes/s3';
 
-function errHandler(err, req, res, next){
-    console.log("in app.js line 28");
-    res.json({error: err});
+function errHandler(err, req: Request, res: Response, next: NextFunction){
+    res.json({error: "There is an error in app.js line 21", err});
 }
 
 // Routes

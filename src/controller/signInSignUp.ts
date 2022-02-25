@@ -29,8 +29,8 @@ export async function registerPosts(req: Request, res: Response){
             else
                 return res.status(400).json({error: "Username is already exist"});
         }       
-    } catch(error){
-        console.log("controller/signinsignup line 34", error);
+    } catch(err){
+        return res.status(500).json({error: err.message});
     }
 
     // Hash the password
@@ -48,7 +48,7 @@ export async function registerPosts(req: Request, res: Response){
         console.log("New user registered");
         res.status(200).json({message: "Sign up successfully"});
     } catch(err) {
-        console.log("controller/signinsignup line 57", err);
+        res.status(500).json({error: err.message});
     } 
     
 };
@@ -71,7 +71,7 @@ export async function logInPost(req: Request, res: Response){
             select: ['id', 'password', 'username'] 
         });
     } catch(err) {
-        console.log("controller/signinsignup line 81", err);
+        return res.status(500).json({error: err.message});
     }
 
     if(result && await bcrypt.compare(req.body.password, result.password)){
@@ -110,7 +110,7 @@ export async function googleLogIn(req: Request, res: Response){
             await user.save();
         };
     } catch(err) {
-        console.log("controller/signinsignup line 98", err);
+        return res.status(500).json({error: err.message});
     };
 
     if(!user){
@@ -122,7 +122,7 @@ export async function googleLogIn(req: Request, res: Response){
                 select: ['id', 'username']
             });
         } catch(err) {
-            console.log("controller/signinsignup line 111", err);
+            return res.status(500).json({error: err.message});
         }
     };
 
@@ -133,7 +133,6 @@ export async function googleLogIn(req: Request, res: Response){
             auth_token: token                    
         };
         console.log("Google login");
-        
         res.status(200).json({UserInfo});
     }
     else{
@@ -149,7 +148,7 @@ export async function passwordReset(req: Request, res: Response){
         return res.status(400).json({error: "Email is not valid"});
     }
 
-    let user: User;;
+    let user: User;
     try{
         user = await User.findOne({ 
             where: [
@@ -157,9 +156,8 @@ export async function passwordReset(req: Request, res: Response){
             ],
             select: ['id', 'fullName', 'email', 'password']
         });
-        //user = await pool.query(`SELECT * FROM users WHERE email='${req.body.email}'`);
     } catch(err) {
-        console.log("controller/signinsignup line 111", err);
+        return res.status(500).json({error: err.message});
     }
 
     if (user && passEmailVer.passResetMail(user)){
@@ -190,7 +188,7 @@ export async function passUpdate(req: Request, res: Response){
             await User.update({ id: req.body.id },{ password: hashpass });
             res.status(200).json({message: "The password updated successfully"});
         } catch(err) {
-            console.log("controller/signinsignup line 165", err);
+            return res.status(500).json({error: err.message});
         }
     }
     else{

@@ -1,4 +1,5 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, OneToMany} from "typeorm";
+import Post from './post';
 
 @Entity("users")
 export default class User extends BaseEntity {
@@ -32,5 +33,8 @@ export default class User extends BaseEntity {
 
     @Column({ nullable: true })
     bio: string;
+
+    @OneToMany(() => Post, (post: Post) => post.user, {onDelete:'CASCADE', onUpdate: 'CASCADE'})
+    post: Array<Post>;
 
 };

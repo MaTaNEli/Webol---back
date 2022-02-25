@@ -16,6 +16,6 @@ export default class Post extends BaseEntity {
     @Column({ nullable: true })
     url: string;
 
-    @ManyToOne(() => User, user => user.id)
+    @ManyToOne(() => User, (user: User) => user.post)
     user: User;
 };

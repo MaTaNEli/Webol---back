@@ -21,15 +21,19 @@ export function admin(req: Request, res: Response, next: NextFunction) {
 
 export function connect(req: Request, res: Response, next: NextFunction) {
     const token = req.header('auth_token');
-    console.log(token);
     if (!token){
-        console.log(token);
-        console.log(1);
+        return res.status(401).json({error: 'Access Denide'});
+    };
+
+    try{
+        req['user'] = jwt.verify(token, process.env.TOKEN_SECRET);
+        if(req['user'])
+            next();
+        else
+            res.status(401).json({error: 'Access Denide'});
+
+    } catch (err) {
         res.status(401).json({error: 'Access Denide'});
-    } else {
-        console.log(token)
-        console.log(2)
-        next();
     }
 }
 
@@ -43,10 +47,10 @@ export async function resetPassToken(req: Request, res: Response, next: NextFunc
     try{
         user = await User.findOne(req.body.id);
     } catch(err) {
-        console.log("verify token line 28", err);
+        return res.status(500).json({error: err.message});
     }
 
-    console.log(user, "the user from verify line 32");
+    console.log(user, "the user from verify line 44");
     if (user){
         const newSecret = process.env.TOKEN_SECRET + user.password;
         try{
@@ -63,7 +67,6 @@ export async function resetPassToken(req: Request, res: Response, next: NextFunc
             return res.status(401).json({error: 'This link was expired'});
         } 
     } else {
-        console.log("verify token line 46");
         res.status(200).json({error: 'Could not find the user'});
     };
 };

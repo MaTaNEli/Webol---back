@@ -5,39 +5,38 @@ import Post from '../entity/post';
 export async function postUserImage(req: Request, res: Response){
     try{
         await User.update({ id: req['user'].id },{ [req.params.image]: req.body.imgurl });
-        res.status(200).json({message: "Profile image updated successfully"});
+        res.status(200).json({message: "Image updated successfully"});
     } catch(err) {
-        console.log("controller/user request line 39", err);
-        res.status(400).json({error: "Profile image did not updated"});
+        res.status(500).json({error: err.message});
     }
 };
 
 export async function getUserPage(req: Request, res: Response){
     try{
-        const user = await User.findOne({
+        const user = await User.find({relations:["post"],
             where: [
                 {username: req.params.username}
             ],
-            select: ['fullName', 'profileImage', 'themeImage', 'role', 'media', 'bio']
+            select: ['fullName', 'profileImage', 'themeImage', 'role', 'media', 'bio', 'post']
         });
+
         if(user)
             res.status(201).json(user);
         else
-            res.status(404).send();
+            res.status(404).json("could not find any user");
     } catch(err) {
-        console.log("controller/user request line 40", err);
-        res.status(400).json({error: "could not find user"});
+        res.status(500).json({error: err.message});
     }
 };
 
-export async function addPost(req: Request, res: Response) {
+export async function addPost(req: Request, res: Response){
     const today = new Date();
-    const date = today.getFullYear()+'/'+(today.getMonth()+1)+'/'+today.getDate();
+    const date = today.getFullYear() + '/' + (today.getMonth() + 1) + '/' + today.getDate();
     const post = new Post;
     post.createdAt = date;
-    post.description = req.body.description;
+    post.description = req.body.description;// should do some validation on data
     post.url = req.body.url;
     post.user = req['user'].id;
     await post.save();
-    res.send()
+    res.status(200).send();
 };
