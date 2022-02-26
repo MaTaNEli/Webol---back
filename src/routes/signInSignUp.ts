@@ -13,6 +13,10 @@ router.post('/resetpass', controller.passwordReset);
 router.post('/updatenewpass', verify.resetPassToken, controller.passUpdate);
 
 // ----------- Auth Get Routes -----------
+router.post('/', (req: express.Request, res: express.Response) =>{
+    console.log(req.body);
+    res.status(200).json({message:"Hello Wrold"});
+})
 
 export default router;
 
