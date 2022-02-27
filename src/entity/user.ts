@@ -34,7 +34,7 @@ export default class User extends BaseEntity {
     @Column({ nullable: true })
     bio: string;
 
-    @OneToMany(() => Post, (post: Post) => post.user, {onDelete:'CASCADE', onUpdate: 'CASCADE'})
+    @OneToMany(() => Post, (post: Post) => post.user, {cascade: true})
     post: Array<Post>;
 
 };

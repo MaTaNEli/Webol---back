@@ -45,7 +45,6 @@ export async function registerPosts(req: Request, res: Response){
     // Save the user in DB
     try{
         await user.save();
-        console.log("New user registered");
         res.status(200).json({message: "Sign up successfully"});
     } catch(err) {
         res.status(500).json({error: err.message});
@@ -81,7 +80,6 @@ export async function logInPost(req: Request, res: Response){
             username: result.username,
             auth_token: token                    
         }
-        console.log("User login");
         res.status(200).json({UserInfo});
     }
     else{
@@ -90,7 +88,6 @@ export async function logInPost(req: Request, res: Response){
 };
 
 export async function googleLogIn(req: Request, res: Response){
-    console.log(req.body)
     let user: User;
     // Create a user
     try{
@@ -132,7 +129,6 @@ export async function googleLogIn(req: Request, res: Response){
             username: user.username,
             auth_token: token                    
         };
-        console.log("Google login");
         res.status(200).json({UserInfo});
     }
     else{
