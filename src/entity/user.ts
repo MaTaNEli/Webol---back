@@ -36,5 +36,4 @@ export default class User extends BaseEntity {
 
     @OneToMany(() => Post, (post: Post) => post.user, {cascade: true})
     post: Array<Post>;
-
 };

@@ -47,6 +47,13 @@ export async function registerPosts(req: Request, res: Response){
         await user.save();
         res.status(200).json({message: "Sign up successfully"});
     } catch(err) {
+        const result = await User.find({ 
+            where: [
+                { email: req.body.email }
+            ]
+        });
+        console.log(req.body)
+        console.log(result)
         res.status(500).json({error: err.message});
     } 
     
@@ -72,7 +79,7 @@ export async function logInPost(req: Request, res: Response){
     } catch(err) {
         return res.status(500).json({error: err.message});
     }
-
+   
     if(result && await bcrypt.compare(req.body.password, result.password)){
         const token = createToken(result.id, result.username)
         
