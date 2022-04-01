@@ -16,7 +16,7 @@ describe("Post to the DB with login", () =>{
         } 
     });
 
-    afterEach(async () =>{
+    afterAll(async () =>{
         try{
             await getConnection()
             .createQueryBuilder()

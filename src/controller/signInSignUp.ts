@@ -163,11 +163,12 @@ export async function passwordReset(req: Request, res: Response){
         return res.status(500).json({error: err.message});
     }
 
-    if (user && passEmailVer.passResetMail(user)){
+    try{
+        await passEmailVer.passResetMail(user);
         res.status(200).json({message:"Email send"});
-    } else {
+    }catch(error){
         res.status(400).json({error:"User did not found"});
-    }    
+    }  
 };
 
 export async function passUpdate(req: Request, res: Response){

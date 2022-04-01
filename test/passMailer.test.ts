@@ -3,10 +3,10 @@ dotenv.config();
 import { getConnection } from "typeorm"
 import { initStorage } from '../src/storage';
 import User from '../src/entity/user';
-import { resetPasswordRequest, registerRequest} from './utilities/controlFunc'
-import faker from '@faker-js/faker';
+import { resetPasswordRequest, registerRequest, loginRequest} from './utilities/controlFunc'
+import { faker } from '@faker-js/faker'
 
-describe("Post for Reset password", () =>{
+describe("Post to the DB with login", () =>{
     beforeAll(async() =>{
         try{
             await initStorage();
@@ -16,7 +16,7 @@ describe("Post for Reset password", () =>{
         } 
     });
 
-    afterEach(async () =>{
+    afterAll(async () =>{
         try{
             await getConnection()
             .createQueryBuilder()
@@ -46,15 +46,16 @@ describe("Post for Reset password", () =>{
         expect(loginRes.statusCode).toBe(400);
     });
 
-    test("When email valid and found respond with a status code 200", async () => {
+    test("When email valid and found respond with a status code 200 only send", async () => {
         const body = {
             username: faker.internet.userName(),
             password: faker.internet.password(),
             fullName: faker.name.findName(),
             email: faker.internet.email()
         };
-        const registerRes = await registerRequest(body)
+        const registerRes = await registerRequest(body);
         expect(registerRes.statusCode).toBe(200);
+        expect(registerRes.text).toBe("{\"message\":\"Sign up successfully\"}");
         const user = {
             email: body.email
         }

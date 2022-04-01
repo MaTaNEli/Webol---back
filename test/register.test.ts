@@ -16,11 +16,16 @@ describe("Post to the DB with Register", () =>{
         };
     });
     
-    afterEach(async () =>{
-        await getConnection()
-        .createQueryBuilder()
-        .delete()
-        .from(User).execute();
+    afterAll(async () =>{
+        try{
+            await getConnection()
+            .createQueryBuilder()
+            .delete()
+            .from(User).execute();
+        }
+        catch(e){
+            console.log(e);
+        } 
     });
 
     test("When username is missing should respond with a status code of 400",async () => {
@@ -92,6 +97,7 @@ describe("Post to the DB with Register", () =>{
         };
         const registerRes = await registerRequest(body)
         expect(registerRes.statusCode).toBe(200);
+        expect(registerRes.text).toBe("{\"message\":\"Sign up successfully\"}");
     });
     
     test("When register with email that is already exist should respond with a status code 400", async () =>{
@@ -103,29 +109,9 @@ describe("Post to the DB with Register", () =>{
         };
         const registerRes = await registerRequest(body);
         expect(registerRes.statusCode).toBe(200);
+        expect(registerRes.text).toBe("{\"message\":\"Sign up successfully\"}");
         const registerResult = await registerRequest(body)
         expect(registerResult.statusCode).toBe(400);
         expect(registerResult.text).toBe("{\"error\":\"Email is already exist\"}");
     });
-
-    test("When register with username that is already exist should respond with a status code 400", async () => {
-        const body = {
-            username: faker.internet.userName(),
-            password: faker.internet.password(),
-            fullName: faker.name.findName(),
-            email: faker.internet.email()
-        };
-        const registerRes = await registerRequest(body);
-        expect(registerRes.statusCode).toBe(200);
-        const user = {
-            username: body.username,
-            password: faker.internet.password(),
-            fullName: faker.name.findName(),
-            email: faker.internet.email()
-        };
-        const registerResult = await registerRequest(user)
-        expect(registerResult.statusCode).toBe(400);
-        expect(registerResult.text).toBe("{\"error\":\"Username is already exist\"}");
-    });
-
 });

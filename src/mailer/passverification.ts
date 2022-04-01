@@ -35,14 +35,6 @@ export async function passResetMail(user: UserInput & { id: string }) {
     
             <p>always here to help, Webol</p>`
     };
-          
-    await transporter.sendMail(mailOptions, function(error, info){
-        if (error) {
-            console.log(error, 'Email did not sent: ');
-            return false;
-        } else {
-            console.log('Email sent: ' + info.response);
-            return true;
-        }
-    });
-}
+
+    return await transporter.sendMail(mailOptions);
+};

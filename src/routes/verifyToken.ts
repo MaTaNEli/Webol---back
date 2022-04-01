@@ -38,6 +38,7 @@ export function connect(req: Request, res: Response, next: NextFunction) {
 }
 
 export async function resetPassToken(req: Request, res: Response, next: NextFunction) {
+    console.log
     const token = req.header('mail_token');
     if (!token){
         return res.status(401).json({error: "Access Denied"});
@@ -50,7 +51,7 @@ export async function resetPassToken(req: Request, res: Response, next: NextFunc
         return res.status(500).json({error: err.message});
     }
 
-    console.log(user, "the user from verify line 44");
+    console.log(user, "the user from verify line 54");
     if (user){
         const newSecret = process.env.TOKEN_SECRET + user.password;
         try{
