@@ -9,7 +9,7 @@ export async function initStorage() {
         password: process.env.PG_PASS,
         database: process.env.PG_DB,
         entities: [ __dirname + '/entity/*{.ts,.js}' ],
-        synchronize: true
+        synchronize: true,
         //logging: true
     })
 };

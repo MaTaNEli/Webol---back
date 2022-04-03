@@ -1,10 +1,11 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, ManyToOne } from "typeorm";
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, ManyToOne, OneToMany } from "typeorm";
 import User from './user';
+import Comment from './comment'
 
 @Entity("post")
 export default class Post extends BaseEntity {
     
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn("uuid")
     id: string;
 
     @Column({ type: 'date' })
@@ -18,4 +19,7 @@ export default class Post extends BaseEntity {
 
     @ManyToOne(() => User, (user: User) => user.post, {onDelete: "CASCADE"})
     user: User;
+
+    @OneToMany(() => Comment, (comment: Comment) => comment.post, {cascade: true})
+    comment: Array<Comment>;
 };
