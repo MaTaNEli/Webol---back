@@ -3,7 +3,8 @@ import User from '../entity/user';
 import Post from '../entity/post';
 import Comment from '../entity/comment';
 import _ from 'lodash';
-import { getConnection, getManager } from 'typeorm';
+import { getManager } from 'typeorm';
+import * as validate from '../validate/postAndComment';
 
 export async function postUserImage(req: Request, res: Response){
     try{
@@ -19,35 +20,15 @@ const blacklistFields = ['password', 'id']
 export async function getUserPage(req: Request, res: Response){
     const information = {};
     try{
-        // const user = await User.findOne({
-        //     where: [
-        //         {id: req['user'].id}
-        //     ], select: ['fullName', 'profileImage', 'themeImage', 'role', 'media', 'bio']
-        // });
-        
-        // const data = await Post.find({relations:["comment"],
-        //     where:[
-        //         {user: req['user'].id}
-        //     ], select: ['id', 'createdAt', 'description', 'url']
-        // });
-
-        // information['user'] = user;
-        // information['post'] = data;
-        let data;
-        try {
-             data = await getManager()
-            .createQueryBuilder(User, 'u')
-            .select('u', '*')
-            .addSelect('p' , '*')
-            .addSelect('c', '*')
-            .leftJoin(Post, 'p', 'u.id = p."userId"')
-            .leftJoin(Comment, 'c', 'p.id = c."postId"')
-            .where(`u.id = '${req['user'].id}'`)
-            .execute();
-        }
-        catch (error) {
-            console.error(error);
-        }
+        const data = await getManager()
+        .createQueryBuilder(User, 'u')
+        .select('u', '*')
+        .addSelect('p' , '*')
+        .addSelect('c', '*')
+        .leftJoin(Post, 'p', 'u.id = p."userId"')
+        .leftJoin(Comment, 'c', 'p.id = c."postId"')
+        .where(`u.id = '${req['user'].id}'`)
+        .execute();
         
         const groupedPosts = _.groupBy(data,'p_id');
         const postsResult = Object.entries(groupedPosts).map(([postId, comments]) => ({ 
@@ -62,7 +43,7 @@ export async function getUserPage(req: Request, res: Response){
                 .value())
                 .filter(c => c.id)
         }))
-        console.log(postsResult)
+
         if(postsResult)
             res.status(201).json({
                 user: _(data[0])
@@ -80,25 +61,48 @@ export async function getUserPage(req: Request, res: Response){
 };
 
 export async function addCommands(req: Request, res: Response){
-    const today = new Date();
-    const date = today.getFullYear() + '/' + (today.getMonth() + 1) + '/' + today.getDate();
+    // Validate the data
+    const { error } = validate.addCommentValidation(req.body);
+    if (error){
+        return res.status(400).json({error: error.details[0].message});
+    }
+
     const command = new Comment;
-    command.createdAt = date;
+    command.createdAt = createDate();;
     command.content = req.body.content;
     command.post = req.body.postId;
     command.username = req['user'].username;
-    await command.save();
-    res.status(200).send();
+    
+    try{
+        await command.save();
+        res.status(200).send();
+    }catch(err) {
+        return res.status(500).json({error: err.message});
+    }
 };
 
 export async function addPost(req: Request, res: Response){
-    const today = new Date();
-    const date = today.getFullYear() + '/' + (today.getMonth() + 1) + '/' + today.getDate();
+    // Validate the data
+    const { error } = validate.addPostValidation(req.body);
+    if (error){
+        return res.status(400).json({error: error.details[0].message});
+    }
+
     const post = new Post;
-    post.createdAt = date;
-    post.description = req.body.description;// should do some validation on data
+    post.createdAt = createDate();
+    post.description = req.body.description;
     post.url = req.body.url;
     post.user = req['user'].id;
-    await post.save();
-    res.status(200).send();
+
+    try{
+        await post.save();
+        res.status(200).send();
+    }catch(err) {
+        return res.status(500).json({error: err.message});
+    }
 };
+
+function createDate(){
+    const today = new Date();
+    return (today.getFullYear() + '/' + (today.getMonth() + 1) + '/' + today.getDate());
+}

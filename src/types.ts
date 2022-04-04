@@ -4,3 +4,13 @@ export interface UserInput {
     fullName: string;
     username: string;
 };
+
+export interface PostInput {
+    description: string;
+    url: string;
+};
+
+export interface CommentInput {
+    content: string;
+    postId: string;
+};
