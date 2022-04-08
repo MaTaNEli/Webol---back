@@ -1,5 +1,6 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, OneToMany} from "typeorm";
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, OneToMany } from "typeorm";
 import Post from './post';
+import Follow from './follow'
 
 @Entity("users")
 export default class User extends BaseEntity {
@@ -36,4 +37,7 @@ export default class User extends BaseEntity {
 
     @OneToMany(() => Post, (post: Post) => post.user, {cascade: true})
     post: Array<Post>;
-};
+
+    @OneToMany(() => Follow, (follow: Follow) => follow.user, {cascade: true})
+    follow: Array<Follow>;
+}

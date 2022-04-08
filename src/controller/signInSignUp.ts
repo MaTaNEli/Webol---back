@@ -154,9 +154,7 @@ export async function passwordReset(req: Request, res: Response){
     let user: User;
     try{
         user = await User.findOne({ 
-            where: [
-                { email: req.body.email }
-            ],
+            where: { email: req.body.email },
             select: ['id', 'fullName', 'email', 'password']
         });
     } catch(err) {

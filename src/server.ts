@@ -13,6 +13,7 @@ app.use(cors({credentials: true, origin: '*'}));
 // Fetch all the routes for the application
 import signInSignUp from './routes/signInSignUp';
 import userRequest from './routes/userRequest';
+import globalRequest from './routes/globalRequest';
 import s3 from './routes/s3';
 
 function errHandler(err, req: Request, res: Response){
@@ -22,6 +23,7 @@ function errHandler(err, req: Request, res: Response){
 // Routes
 app.use('/', signInSignUp);
 app.use('/user', userRequest);
+app.use('/global', globalRequest);
 app.use('/s3', s3);
 
 //Get all the err without crash
