@@ -25,7 +25,7 @@ export async function getUserPage(req: Request, res: Response){
         .createQueryBuilder("user")
         .leftJoinAndSelect("user.post", "p")
         .leftJoinAndMapOne('p.like', Like, 'like',
-            `like.username = '${req.params.username}' and p.id = like.post`)
+            `like.username = '${req['user'].username}' and p.id = like.post`)
         .limit(AMOUNT).offset()
         .where(`user.username = '${req.params.username}'`)
         .loadRelationCountAndMap("user.follow", "user.follow")
