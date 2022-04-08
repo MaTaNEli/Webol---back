@@ -6,6 +6,7 @@ import _ from 'lodash';
 import { getManager } from 'typeorm';
 import * as validate from '../validate/postAndComment';
 import Follow from '../entity/follow';
+import { pseudoRandomBytes } from 'crypto';
 
 export async function updateUserImage(req: Request, res: Response){
     try{
@@ -67,7 +68,7 @@ export async function addPost(req: Request, res: Response){
     try{
         const post = createPost(req.body, req['user'].id)
         await post.save();
-        res.status(200).send();
+        res.status(201).send();
     }catch(err) {
         return res.status(500).json({error: err.message});
     }
@@ -77,6 +78,15 @@ export async function addFollower(req: Request, res: Response){
     try{
         const follow = createFollower(req['user'].id, req['userNameId']);
         await follow.save();
+        res.status(201).send();
+    }catch(err) {
+        return res.status(500).json({error: err.message});
+    }
+};
+
+export async function deletePost(req: Request, res: Response){
+    try{
+        const post = await Post.delete({id: req.params.postId, user: req['user'].id})
         res.status(200).send();
     }catch(err) {
         return res.status(500).json({error: err.message});

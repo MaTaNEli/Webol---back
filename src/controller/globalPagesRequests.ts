@@ -16,7 +16,7 @@ export async function addOrDeleteLike(req: Request, res: Response){
             like.username = req['user'].username;
             like.post = req.params.postId;
             await like.save();
-            res.status(200).send();
+            res.status(201).send();
         }catch(err) {
             return res.status(500).json({error: err.message});
         }
@@ -43,7 +43,7 @@ export async function addCommands(req: Request, res: Response){
     
     try{
         await command.save();
-        res.status(200).send();
+        res.status(201).send();
     }catch(err) {
         return res.status(500).json({error: err.message});
     }

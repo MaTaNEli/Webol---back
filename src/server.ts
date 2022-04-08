@@ -16,8 +16,8 @@ import userRequest from './routes/userRequest';
 import globalRequest from './routes/globalRequest';
 import s3 from './routes/s3';
 
-function errHandler(err, req: Request, res: Response){
-    res.json({error: "There is an error in app.js line 21", err});
+function errHandler(req: Request, res: Response){
+    res.status(404).json({error: "Sorry could not find the page"});
 }
 
 // Routes

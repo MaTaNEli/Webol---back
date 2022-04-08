@@ -1,9 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import User from '../entity/user';
-import { getManager } from 'typeorm';
-import Follow from '../entity/follow';
-
 
 export function admin(req: Request, res: Response, next: NextFunction) {
     const token = req.header('auth_token');
@@ -61,7 +58,6 @@ export async function connectAndGetUser(req: Request, res: Response, next: NextF
             }catch (err){
                 return res.status(500).json({error: err.message});
             }
-            
         }
         else
             res.status(401).json({error: 'Access Denide'});
@@ -94,9 +90,8 @@ export async function resetPassToken(req: Request, res: Response, next: NextFunc
                 req['user'] = userInfo;
                 next();
             }
-            else{
+            else
                 return res.status(401).json({error: 'This link was expired'});
-            }
         }
         catch {
             return res.status(401).json({error: 'This link was expired'});
