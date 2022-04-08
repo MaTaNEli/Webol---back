@@ -2,9 +2,8 @@ import { Request, Response } from 'express';
 import User from '../entity/user';
 import Post from '../entity/post';
 import Like from '../entity/likes';
-import Comment from '../entity/comment';
 import _ from 'lodash';
-import { getManager, RelationId } from 'typeorm';
+import { getManager } from 'typeorm';
 import * as validate from '../validate/postAndComment';
 import Follow from '../entity/follow';
 
@@ -25,7 +24,8 @@ export async function getUserPage(req: Request, res: Response){
         .getRepository(User)
         .createQueryBuilder("user")
         .leftJoinAndSelect("user.post", "p")
-        .leftJoinAndMapOne('p.like', Like, 'like', `like.username = '${req.params.username}' and p.id = like.post`)
+        .leftJoinAndMapOne('p.like', Like, 'like',
+            `like.username = '${req.params.username}' and p.id = like.post`)
         .limit(AMOUNT).offset()
         .where(`user.username = '${req.params.username}'`)
         .loadRelationCountAndMap("user.follow", "user.follow")
@@ -57,27 +57,6 @@ export async function getUserPage(req: Request, res: Response){
     }
 };
 
-export async function addCommands(req: Request, res: Response){
-    // Validate the data
-    const { error } = validate.addCommentValidation(req.body);
-    if (error){
-        return res.status(400).json({error: error.details[0].message});
-    }
-
-    const command = new Comment;
-    command.createdAt = createDate();;
-    command.content = req.body.content;
-    command.post = req.body.postId;
-    command.username = req['user'].username;
-    
-    try{
-        await command.save();
-        res.status(200).send();
-    }catch(err) {
-        return res.status(500).json({error: err.message});
-    }
-};
-
 export async function addPost(req: Request, res: Response){
     // Validate the data
     const { error } = validate.addPostValidation(req.body);
@@ -106,7 +85,7 @@ export async function addFollower(req: Request, res: Response){
 
 //------------------------------- CREATE FUNCTIONS -----------------------------------
 
-function createDate(){
+export function createDate(){
     const today = new Date();
     return (today.getFullYear() + '/' + (today.getMonth() + 1) + '/' + today.getDate());
 }

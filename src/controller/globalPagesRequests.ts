@@ -1,11 +1,9 @@
 import { Request, Response } from 'express';
-import User from '../entity/user';
-import Post from '../entity/post';
 import Comment from '../entity/comment';
 import _ from 'lodash';
-import { getManager, RelationId } from 'typeorm';
 import * as validate from '../validate/postAndComment';
 import Like from '../entity/likes';
+import {createDate} from './userPageRequests'
 
 
 export async function addOrDeleteLike(req: Request, res: Response){
@@ -27,4 +25,26 @@ export async function addOrDeleteLike(req: Request, res: Response){
         res.status(200).send();
     }
     
+};
+
+
+export async function addCommands(req: Request, res: Response){
+    // Validate the data
+    const { error } = validate.addCommentValidation(req.body);
+    if (error){
+        return res.status(400).json({error: error.details[0].message});
+    }
+
+    const command = new Comment;
+    command.createdAt = createDate();;
+    command.content = req.body.content;
+    command.post = req.body.postId;
+    command.username = req['user'].username;
+    
+    try{
+        await command.save();
+        res.status(200).send();
+    }catch(err) {
+        return res.status(500).json({error: err.message});
+    }
 };
