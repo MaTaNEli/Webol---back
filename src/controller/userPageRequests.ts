@@ -6,8 +6,8 @@ import _ from 'lodash';
 import { getManager } from 'typeorm';
 import * as validate from '../validate/postAndComment';
 import Follow from '../entity/follow';
-import { pseudoRandomBytes } from 'crypto';
 
+// Update the user profile image or theme image
 export async function updateUserImage(req: Request, res: Response){
     try{
         await User.update({ id: req['user'].id },{ [req.params.image]: req.body.imgurl });
@@ -17,36 +17,34 @@ export async function updateUserImage(req: Request, res: Response){
     }
 };
 
-
+// Main function to get user's page
 export async function getUserPage(req: Request, res: Response){
+    const blackList = ['password', 'follow']
     const AMOUNT = 20;
     try{
         const user = await getManager()
         .getRepository(User)
         .createQueryBuilder("user")
+        .leftJoinAndMapOne('user.follow', Follow, 'f',
+            `f.follower = '${req['user'].id}' and f.user = user.id`)
         .leftJoinAndSelect("user.post", "p")
         .leftJoinAndMapOne('p.like', Like, 'like',
             `like.username = '${req['user'].username}' and p.id = like.post`)
         .limit(AMOUNT).offset()
         .where(`user.username = '${req.params.username}'`)
-        .loadRelationCountAndMap("user.follow", "user.follow")
+        .loadRelationCountAndMap("user.followers", "user.follow")
         .loadRelationCountAndMap('p.comments', 'p.comment')
         .loadRelationCountAndMap('p.likes', 'p.like').getMany();   
-        
-        const follows = await Follow.findOne({
-            where: { follower: req['user'].id, followesAfter: user[0].id }  
-        });
 
-        if(user)
-        {
+        if(user) {
             let data = [];
             const isMe = user[0].id == req['user'].id;
             data.push(isMe);
-            data.push(follows || isMe ? true : false);
-            data.push(follows || isMe ? 
-                _(user[0]).pickBy((v, k) => k != "password").value()
+            data.push(user[0].follow || isMe ? true : false);
+            data.push(user[0].follow || isMe ? 
+                _(user[0]).pickBy((v, k) => !blackList.includes(k)).value()
                 :
-                _(user[0]).pickBy((v, k) => k != "password" && k != "post").value()
+                _(user[0]).pickBy((v, k) => !blackList.includes(k) && k != "post").value()
                 );
 
             res.status(201).json(data);
@@ -58,12 +56,12 @@ export async function getUserPage(req: Request, res: Response){
     }
 };
 
+// Create new post function
 export async function addPost(req: Request, res: Response){
     // Validate the data
     const { error } = validate.addPostValidation(req.body);
-    if (error){
+    if (error)
         return res.status(400).json({error: error.details[0].message});
-    }
 
     try{
         const post = createPost(req.body, req['user'].id)
@@ -74,9 +72,10 @@ export async function addPost(req: Request, res: Response){
     }
 };
 
+// Add new follower 
 export async function addFollower(req: Request, res: Response){
     try{
-        const follow = createFollower(req['user'].id, req['userNameId']);
+        const follow = createFollower(req['user'].id, req.params.userToFollowId);
         await follow.save();
         res.status(201).send();
     }catch(err) {
@@ -84,6 +83,7 @@ export async function addFollower(req: Request, res: Response){
     }
 };
 
+// Delete one post of user
 export async function deletePost(req: Request, res: Response){
     try{
         const post = await Post.delete({id: req.params.postId, user: req['user'].id})
@@ -93,7 +93,7 @@ export async function deletePost(req: Request, res: Response){
     }
 };
 
-//------------------------------- CREATE FUNCTIONS -----------------------------------
+//------------------------------- Create functions -----------------------------------
 
 export function createDate(){
     const today = new Date();
@@ -112,7 +112,6 @@ function createPost (body: Post, id: User){
 function createFollower(userId: string, followingId: string){
     const follow = new Follow;
     follow.follower = userId;
-    follow.followesAfter = followingId;
     follow.user = followingId;
     return follow;
 }

@@ -2,13 +2,15 @@ import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import User from '../entity/user';
 
+// Middleware to check if the user is the admin 
 export function admin(req: Request, res: Response, next: NextFunction) {
     const token = req.header('auth_token');
     if (!token) return res.status(401).json({error: 'Access Denide'});
 
     try{
+        // Get the user details
         req['user'] = jwt.verify(token, process.env.TOKEN_SECRET);
-        if(req['user'].username == req.params.username)
+        if(req['user'] && req['user'].username == req.params.username)
             next();
         else
             res.status(401).json({error: 'Access Denide'});
@@ -18,12 +20,11 @@ export function admin(req: Request, res: Response, next: NextFunction) {
     }
 }
 
+// Middleware to check if the user is connected
 export async function connect(req: Request, res: Response, next: NextFunction) {
     const token = req.header('auth_token');
-    if (!token){
-        return res.status(401).json({error: 'Access Denide'});
-    };
-
+    if (!token) return res.status(401).json({error: 'Access Denide'});
+    
     try{
         req['user'] = jwt.verify(token, process.env.TOKEN_SECRET);
         if(req['user'])
@@ -36,52 +37,20 @@ export async function connect(req: Request, res: Response, next: NextFunction) {
     }
 }
 
-export async function connectAndGetUser(req: Request, res: Response, next: NextFunction) {
-    const token = req.header('auth_token');
-    if (!token){
-        return res.status(401).json({error: 'Access Denide'});
-    };
-
-    try{
-        req['user'] = jwt.verify(token, process.env.TOKEN_SECRET);
-        
-        if(req['user']){
-            try{
-                const user = await User.findOne({
-                    where: { username: req.params.username},
-                    select: ['id']
-                });
-                // chance for user be undefined------------------------------------------
-                req['userNameId'] = user.id;
-                next();
-
-            }catch (err){
-                return res.status(500).json({error: err.message});
-            }
-        }
-        else
-            res.status(401).json({error: 'Access Denide'});
-
-    } catch (err) {
-        res.status(401).json({error: 'Access Denide'});
-    }
-}
-
+// Middleware for new password, special link with special token to decrypt
 export async function resetPassToken(req: Request, res: Response, next: NextFunction) {
     console.log
     const token = req.header('mail_token');
-    if (!token){
-        return res.status(401).json({error: "Access Denied"});
-    } 
+    if (!token) return res.status(401).json({error: "Access Denied"});
+    
     let user: User;
-
     try{
-        user = await User.findOne(req.body.id);
+        user = await User.findOne({where: {id: req.body.id}, select : ['password']});
     } catch(err) {
         return res.status(500).json({error: err.message});
     }
 
-    console.log(user, "the user from verify line 74");
+    console.log(user, "the user from verify line 53");
     if (user){
         const newSecret = process.env.TOKEN_SECRET + user.password;
         try{

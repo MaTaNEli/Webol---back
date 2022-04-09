@@ -10,7 +10,4 @@ router.get('/geturl/:username',verify.admin, async (req, res) =>{
     res.status(200).json(url);
 });
 
-// ----------- Auth Get Routes -----------
-
-
 export default router;

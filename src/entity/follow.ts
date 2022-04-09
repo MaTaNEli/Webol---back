@@ -7,11 +7,8 @@ export default class Follow extends BaseEntity {
     @PrimaryGeneratedColumn("uuid")
     id: string;
 
-    @Column()
+    @Column("uuid", { nullable: true })
     follower: string;
-
-    @Column()
-    followesAfter: string;
 
     @ManyToOne(() => User, (user: User) => user.follow, {onDelete: "CASCADE", onUpdate: "CASCADE"})
     user: string;

@@ -1,13 +1,14 @@
 import * as express from 'express';
 import * as controller from '../controller/globalPagesRequests';
 import * as verify from './verifyToken';
+
 const router = express.Router();
 
 // ----------- Auth Post Routes -----------
-router.post('/addcomand', verify.connect, controller.addCommands);
+router.post('/addcomment', verify.connect, controller.addComment);
 
 // ----------- Auth Get Routes -----------
-router.get('/addOrDeleteLike/:postId', verify.connect, controller.addOrDeleteLike);
-
-
+router.get('/addordeletelike/:postId', verify.connect, controller.addOrDeleteLike);
+router.get('/getcomments/:postId', verify.connect, controller.getComments);
+router.get('/deletecomment/:commentId', verify.connect, controller.deleteComment);
 export default router;

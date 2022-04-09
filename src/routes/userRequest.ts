@@ -10,7 +10,7 @@ router.post('/addpost/:username', verify.admin, controller.addPost);
 
 // ----------- Auth Get Routes -----------
 router.get('/:username', verify.connect, controller.getUserPage);
-router.get('/deletePost/:username/:postId', verify.admin, controller.deletePost);
-router.get('/addFollower/:userToFollowId', verify.connectAndGetUser, controller.addFollower); 
+router.get('/deletepost/:username/:postId', verify.admin, controller.deletePost);
+router.get('/addfollower/:userToFollowId', verify.connect, controller.addFollower); 
 
 export default router;

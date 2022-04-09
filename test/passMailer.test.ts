@@ -16,17 +16,17 @@ describe("Post to the DB with login", () =>{
         } 
     });
 
-    afterAll(async () =>{
-        try{
-            await getConnection()
-            .createQueryBuilder()
-            .delete()
-            .from(User).execute();
-        }
-        catch(e){
-            console.log(e);
-        } 
-    });
+    // afterAll(async () =>{
+    //     try{
+    //         await getConnection()
+    //         .createQueryBuilder()
+    //         .delete()
+    //         .from(User).execute();
+    //     }
+    //     catch(e){
+    //         console.log(e);
+    //     } 
+    // });
 
     test("When email is not valid should respond with a status code 400",async () => {
         const body = {

@@ -9,13 +9,12 @@ const genUsername = require("unique-username-generator");
 export async function registerPosts(req: Request, res: Response){
     // Validate the data
     const { error } = validate.registerValidation(req.body);
-    if (error){
+    if (error)
         return res.status(400).json({error: error.details[0].message});
-    }
     
     try{
         // Check if user is in DB
-        const result = await User.find({ 
+        const result = await User.findOne({ 
             where: [
                 { email: req.body.email },
                 { username: req.body.username }
@@ -23,8 +22,8 @@ export async function registerPosts(req: Request, res: Response){
             select: ['username', 'email']
         });
 
-        if (result[0]) {
-            if(result[0].email == req.body.email)
+        if (result) {
+            if(result.email == req.body.email)
                 return res.status(400).json({error: "Email is already exist"});
             else
                 return res.status(400).json({error: "Username is already exist"});
@@ -47,13 +46,6 @@ export async function registerPosts(req: Request, res: Response){
         await user.save();
         res.status(200).json({message: "Sign up successfully"});
     } catch(err) {
-        const result = await User.find({ 
-            where: [
-                { email: req.body.email }
-            ]
-        });
-        console.log(req.body)
-        console.log(result)
         res.status(500).json({error: err.message});
     } 
     
@@ -62,9 +54,8 @@ export async function registerPosts(req: Request, res: Response){
 export async function logInPost(req: Request, res: Response){
     // Validate the data
     const { error } = validate.loginValidation(req.body);
-    if (error){
+    if (error)
         return res.status(400).json({error: "Email or Password are incorrect"});
-    }
 
     let result: User;
     try{
@@ -99,9 +90,7 @@ export async function googleLogIn(req: Request, res: Response){
     // Create a user
     try{
         user = await User.findOne({
-            where:[
-                {email: req.body.email}
-            ],
+            where:{email: req.body.email},
             select:['id', 'username']
         });
         if(!user){
@@ -120,9 +109,7 @@ export async function googleLogIn(req: Request, res: Response){
     if(!user){
         try{
             user = await User.findOne({ 
-                where: [
-                    { email: req.body.email }
-                ],
+                where:{ email: req.body.email },
                 select: ['id', 'username']
             });
         } catch(err) {
@@ -147,9 +134,8 @@ export async function passwordReset(req: Request, res: Response){
 
     // Validate the data
     const { error } = validate.emailValidation(req.body);
-    if (error){
+    if (error)
         return res.status(400).json({error: "Email is not valid"});
-    }
 
     let user: User;
     try{
@@ -203,11 +189,9 @@ async function userNameGenerator(email: string){
     let username: string;
     let tempUser: Pick<User, 'username'>;
     do {                
-        username = genUsername.generateFromEmail(email, 3);
+        username = genUsername.generateFromEmail(email, 5);
         tempUser = await User.findOne({
-            where:[
-                {username: username}
-            ],
+            where:{username: username},
             select: ['username']
         })
     } while (tempUser);

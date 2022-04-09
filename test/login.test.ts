@@ -16,17 +16,17 @@ describe("Post to the DB with login", () =>{
         } 
     });
 
-    afterAll(async () =>{
-        try{
-            await getConnection()
-            .createQueryBuilder()
-            .delete()
-            .from(User).execute();
-        }
-        catch(e){
-            console.log(e);
-        } 
-    });
+    // afterAll(async () =>{
+    //     try{
+    //         await getConnection()
+    //         .createQueryBuilder()
+    //         .delete()
+    //         .from(User).execute();
+    //     }
+    //     catch(e){
+    //         console.log(e);
+    //     } 
+    // });
 
     test("When username is missing should respond with a status code of 400",async () => {
         const body = {
@@ -108,9 +108,8 @@ describe("Post to the DB with login", () =>{
             name: faker.internet.userName(),
             email: faker.internet.email()
         };
-        for(let i = 0; i < 2; i++){
-            const res = await googleRequest(body)
-            expect(res.statusCode).toBe(200)
-        };
+        
+        const res = await googleRequest(body)
+        expect(res.statusCode).toBe(200)
     });
 });

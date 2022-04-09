@@ -16,17 +16,17 @@ describe("Post to the DB with Register", () =>{
         };
     });
     
-    afterAll(async () =>{
-        try{
-            await getConnection()
-            .createQueryBuilder()
-            .delete()
-            .from(User).execute();
-        }
-        catch(e){
-            console.log(e);
-        } 
-    });
+    // afterAll(async () =>{
+    //     try{
+    //         await getConnection()
+    //         .createQueryBuilder()
+    //         .delete()
+    //         .from(User).execute();
+    //     }
+    //     catch(e){
+    //         console.log(e);
+    //     } 
+    // });
 
     test("When username is missing should respond with a status code of 400",async () => {
         const body = {
