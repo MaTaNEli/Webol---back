@@ -17,3 +17,10 @@ export async function googleRequest (body: {name: string, email: string}){
 export async function resetPasswordRequest (body: {email: string}){
     return await request(app).post("/resetpass").send(body);
 };
+
+export async function addPostRequest (body: {description: string, url: string}, token: string){
+    if(token)
+        return await  request(app).post("/user/addpost").set('auth_token', token).send(body);
+    else 
+        return await request(app).post("/user/addpost").send(body);
+};

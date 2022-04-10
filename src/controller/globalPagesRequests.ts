@@ -3,9 +3,6 @@ import Comment from '../entity/comment';
 import _ from 'lodash';
 import * as validate from '../validate/postAndComment';
 import Like from '../entity/likes';
-import {createDate} from './userPageRequests'
-import { getManager } from 'typeorm';
-
 
 export async function addOrDeleteLike(req: Request, res: Response){
     let like : Like;
@@ -28,8 +25,7 @@ export async function addOrDeleteLike(req: Request, res: Response){
     }else{
         await Like.remove(like);
         res.status(200).send();
-    }
-    
+    } 
 };
 
 export async function addComment(req: Request, res: Response){
@@ -40,7 +36,6 @@ export async function addComment(req: Request, res: Response){
     }
 
     const command = new Comment;
-    command.createdAt = createDate();;
     command.content = req.body.content;
     command.post = req.body.postId;
     command.username = req['user'].username;

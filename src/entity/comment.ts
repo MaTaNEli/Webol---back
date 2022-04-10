@@ -1,4 +1,4 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, ManyToOne } from "typeorm";
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn } from "typeorm";
 import Post from './post';
 
 @Entity("comment")
@@ -7,8 +7,8 @@ export default class Comment extends BaseEntity {
     @PrimaryGeneratedColumn("uuid")
     id: string;
 
-    @Column({ type: 'date' })
-    createdAt: string;
+    @CreateDateColumn() 
+    createdAt: Date;
 
     @Column({ nullable: true })
     content : string;

@@ -30,7 +30,8 @@ export async function getUserPage(req: Request, res: Response){
         .leftJoinAndSelect("user.post", "p")
         .leftJoinAndMapOne('p.like', Like, 'like',
             `like.username = '${req['user'].username}' and p.id = like.post`)
-        .limit(AMOUNT).offset()
+        .orderBy('p.id','DESC')
+        .limit(AMOUNT)
         .where(`user.username = '${req.params.username}'`)
         .loadRelationCountAndMap("user.followers", "user.follow")
         .loadRelationCountAndMap('p.comments', 'p.comment')
@@ -47,7 +48,7 @@ export async function getUserPage(req: Request, res: Response){
                 _(user[0]).pickBy((v, k) => !blackList.includes(k) && k != "post").value()
                 );
 
-            res.status(201).json(data);
+            res.status(200).json(data);
         }
         else
             res.status(404).json("could not find any user");
@@ -94,15 +95,8 @@ export async function deletePost(req: Request, res: Response){
 };
 
 //------------------------------- Create functions -----------------------------------
-
-export function createDate(){
-    const today = new Date();
-    return (today.getFullYear() + '/' + (today.getMonth() + 1) + '/' + today.getDate());
-}
-
 function createPost (body: Post, id: User){
     const post = new Post;
-    post.createdAt = createDate();
     post.description = body.description;
     post.url = body.url;
     post.user = id;

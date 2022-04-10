@@ -2,24 +2,6 @@ import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import User from '../entity/user';
 
-// Middleware to check if the user is the admin 
-export function admin(req: Request, res: Response, next: NextFunction) {
-    const token = req.header('auth_token');
-    if (!token) return res.status(401).json({error: 'Access Denide'});
-
-    try{
-        // Get the user details
-        req['user'] = jwt.verify(token, process.env.TOKEN_SECRET);
-        if(req['user'] && req['user'].username == req.params.username)
-            next();
-        else
-            res.status(401).json({error: 'Access Denide'});
-
-    } catch (err) {
-        res.status(401).json({error: 'Access Denide'});
-    }
-}
-
 // Middleware to check if the user is connected
 export async function connect(req: Request, res: Response, next: NextFunction) {
     const token = req.header('auth_token');

@@ -1,4 +1,4 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, ManyToOne, OneToMany } from "typeorm";
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, ManyToOne, OneToMany, CreateDateColumn } from "typeorm";
 import User from './user';
 import Comment from './comment'
 import Likes from "./likes";
@@ -6,11 +6,11 @@ import Likes from "./likes";
 @Entity("post")
 export default class Post extends BaseEntity {
     
-    @PrimaryGeneratedColumn("uuid")
+    @PrimaryGeneratedColumn()
     id: string;
 
-    @Column({ type: 'date' })
-    createdAt: string;
+    @CreateDateColumn() 
+    createdAt: Date;
 
     @Column({ nullable: true })
     description: string;
