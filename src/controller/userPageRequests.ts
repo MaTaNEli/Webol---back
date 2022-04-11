@@ -29,7 +29,7 @@ export async function getUserPage(req: Request, res: Response){
             `f.follower = '${req['user'].id}' and f.user = user.id`)
         .leftJoinAndSelect("user.post", "p")
         .leftJoinAndMapOne('p.like', Like, 'like',
-            `like.username = '${req['user'].username}' and p.id = like.post`)
+            `like.user = '${req['user'].id}' and p.id = like.post`)
         .orderBy('p.id','DESC')
         .limit(AMOUNT)
         .where(`user.username = '${req.params.username}'`)
@@ -65,8 +65,7 @@ export async function addPost(req: Request, res: Response){
         return res.status(400).json({error: error.details[0].message});
 
     try{
-        const post = createPost(req.body, req['user'].id)
-        await post.save();
+        await createPost(req.body, req['user'].id).save();
         res.status(201).send();
     }catch(err) {
         return res.status(500).json({error: err.message});
@@ -74,20 +73,31 @@ export async function addPost(req: Request, res: Response){
 };
 
 // Add new follower 
-export async function addFollower(req: Request, res: Response){
+export async function addOrDeleteFollower(req: Request, res: Response){
+    let follow : Follow;
     try{
-        const follow = createFollower(req['user'].id, req.params.userToFollowId);
-        await follow.save();
-        res.status(201).send();
-    }catch(err) {
+        follow = await Follow.findOne({ where: { follower: req['user'].id, user: req.params.userToFollowId }})
+    } catch(err) {
         return res.status(500).json({error: err.message});
+    }
+    
+    if(!follow){
+        try{
+            await createFollower(req['user'].id, req.params.userToFollowId).save();
+            res.status(201).send();
+        }catch(err) {
+            return res.status(500).json({error: err.message});
+        }
+    } else {
+        await Follow.remove(follow);
+        res.status(200).send();
     }
 };
 
 // Delete one post of user
 export async function deletePost(req: Request, res: Response){
     try{
-        const post = await Post.delete({id: req.params.postId, user: req['user'].id})
+        await Post.delete({id: req.params.postId, user: req['user'].id})
         res.status(200).send();
     }catch(err) {
         return res.status(500).json({error: err.message});
@@ -95,7 +105,7 @@ export async function deletePost(req: Request, res: Response){
 };
 
 //------------------------------- Create functions -----------------------------------
-function createPost (body: Post, id: User){
+function createPost (body: Post, id: string){
     const post = new Post;
     post.description = body.description;
     post.url = body.url;

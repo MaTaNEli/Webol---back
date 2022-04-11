@@ -13,7 +13,7 @@ export function addPostValidation(data : PostInput) {
 export function addCommentValidation(data : CommentInput) {
     const schema = Joi.object({
         content: Joi.string().required(),
-        postId: Joi.string().required()
+        postId: Joi.number().required()
     });
     return schema.validate(data);  
 };

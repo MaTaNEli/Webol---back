@@ -19,7 +19,7 @@ export default class Post extends BaseEntity {
     url: string;
 
     @ManyToOne(() => User, (user: User) => user.post, {onDelete: "CASCADE", onUpdate: "CASCADE"})
-    user: User;
+    user: string;
 
     @OneToMany(() => Comment, (comment: Comment) => comment.post, {cascade: true})
     comment: Array<Comment>;

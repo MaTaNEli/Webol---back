@@ -9,6 +9,7 @@ router.post('/addcomment', verify.connect, controller.addComment);
 
 // ----------- Auth Get Routes -----------
 router.get('/addordeletelike/:postId', verify.connect, controller.addOrDeleteLike);
-router.get('/getcomments/:postId', verify.connect, controller.getComments);
+router.get('/getcomments/:postId/:offset', verify.connect, controller.getComments);
+router.get('/getlikes/:postId/:offset', verify.connect, controller.getLikes);
 router.get('/deletecomment/:commentId', verify.connect, controller.deleteComment);
 export default router;

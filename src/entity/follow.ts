@@ -4,10 +4,10 @@ import User from './user';
 @Entity("follow")
 export default class Follow extends BaseEntity {
     
-    @PrimaryGeneratedColumn("uuid")
+    @PrimaryGeneratedColumn()
     id: string;
 
-    @Column("uuid", { nullable: true })
+    @ManyToOne(() => User, (user: User) => user.follower, {onDelete: "CASCADE", onUpdate: "CASCADE"})
     follower: string;
 
     @ManyToOne(() => User, (user: User) => user.follow, {onDelete: "CASCADE", onUpdate: "CASCADE"})

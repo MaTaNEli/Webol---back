@@ -1,10 +1,11 @@
 import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn } from "typeorm";
 import Post from './post';
+import User from "./user";
 
 @Entity("comment")
 export default class Comment extends BaseEntity {
     
-    @PrimaryGeneratedColumn("uuid")
+    @PrimaryGeneratedColumn()
     id: string;
 
     @CreateDateColumn() 
@@ -13,9 +14,9 @@ export default class Comment extends BaseEntity {
     @Column({ nullable: true })
     content : string;
 
-    @Column()
-    username: string;
+    @ManyToOne(() => User, (user: User) => user.comment, {onDelete: "CASCADE", onUpdate: "CASCADE"})
+    user: string;
 
     @ManyToOne(() => Post, (post: Post) => post.comment, {onDelete: "CASCADE", onUpdate: "CASCADE"})
-    post: Post;
+    post: string;
 };
