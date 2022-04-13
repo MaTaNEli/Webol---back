@@ -4,7 +4,6 @@ import Follow from './follow';
 import Comment from './comment';
 import Like from './likes';
 
-
 @Entity("users")
 export default class User extends BaseEntity {
     
@@ -31,9 +30,6 @@ export default class User extends BaseEntity {
 
     @Column({ nullable: true })
     role: string;
-
-    @Column()
-    media: number;
 
     @Column({ nullable: true })
     bio: string;

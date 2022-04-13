@@ -6,7 +6,7 @@ const router = express.Router();
 // ----------- Auth Post Routes -----------
 router.post('/userimage/:image', verify.connect, controller.updateUserImage);
 router.post('/addpost', verify.connect, controller.addPost);
-
+router.post('/updatebio', verify.connect, controller.updateBio);
 
 // ----------- Auth Get Routes -----------
 router.get('/:username', verify.connect, controller.getUserPage);

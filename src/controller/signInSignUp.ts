@@ -58,31 +58,37 @@ export async function logInPost(req: Request, res: Response){
         return res.status(400).json({error: "Email or Password are incorrect"});
 
     let result: User;
+    console.log(req.body)
     try{
         // Check if user is in DB
         result = await User.findOne({ 
             where: [
-                { email: req.body.username },
-                { username: req.body.username }
+                { email: req.body.username.trim() },
+                { username: req.body.username.trim() }
             ],
             select: ['id', 'password', 'username'] 
         });
     } catch(err) {
         return res.status(500).json({error: err.message});
     }
-   
-    if(result && await bcrypt.compare(req.body.password, result.password)){
-        const token = createToken(result.id, result.username)
-        
-        const UserInfo = {
-            username: result.username,
-            auth_token: token                    
+    console.log(result)
+    try{
+        if(result && await bcrypt.compare(req.body.password, result.password)){
+            const token = createToken(result.id, result.username)
+            
+            const UserInfo = {
+                username: result.username,
+                auth_token: token                    
+            }
+            res.status(200).json({UserInfo});
         }
-        res.status(200).json({UserInfo});
-    }
-    else{
-        res.status(401).json({error: "Email or Password are incorrect"});
-    }
+        else{
+            res.status(401).json({error: "Email or Password are incorrect"});
+        }
+    }catch(err){
+        res.status(401).json({error: err});
+   }
+    
 };
 
 export async function googleLogIn(req: Request, res: Response){
@@ -100,6 +106,7 @@ export async function googleLogIn(req: Request, res: Response){
             // Save user in DB
             const { name, email } = req.body;
             const user = createUser(name, email, username);
+            user.password = jwt.sign(email, process.env.TOKEN_SECRET)
             await user.save();
         };
     } catch(err) {
@@ -175,7 +182,7 @@ export async function passUpdate(req: Request, res: Response){
 
         try{
             await User.update({ id: req.body.id },{ password: hashpass });
-            res.status(200).json({message: "The password updated successfully"});
+            res.status(200).send();
         } catch(err) {
             return res.status(500).json({error: err.message});
         }
@@ -185,6 +192,7 @@ export async function passUpdate(req: Request, res: Response){
     }   
 };
 
+//------------------------------- Create functions -----------------------------------
 async function userNameGenerator(email: string){
     let username: string;
     let tempUser: Pick<User, 'username'>;
@@ -205,7 +213,6 @@ function createUser(fullName: string, email: string, username: string){
     user.username = username;
     user.profileImage = process.env.PROFILE_IMAGE;
     user.themeImage = process.env.THEME_IMAGE;
-    user.media = 0;
     return user;
 };
 

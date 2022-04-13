@@ -29,8 +29,7 @@ app.use('/s3', s3);
 //Get all the err without crash
 app.use(errHandler);
 
-async () =>{
-    console.log("dbngb")    
+async () =>{ 
     await getConnection().close();
 };
 

@@ -21,7 +21,7 @@ export async function connect(req: Request, res: Response, next: NextFunction) {
 
 // Middleware for new password, special link with special token to decrypt
 export async function resetPassToken(req: Request, res: Response, next: NextFunction) {
-    console.log
+   
     const token = req.header('mail_token');
     if (!token) return res.status(401).json({error: "Access Denied"});
     
@@ -32,7 +32,6 @@ export async function resetPassToken(req: Request, res: Response, next: NextFunc
         return res.status(500).json({error: err.message});
     }
 
-    console.log(user, "the user from verify line 53");
     if (user){
         const newSecret = process.env.TOKEN_SECRET + user.password;
         try{
@@ -48,6 +47,6 @@ export async function resetPassToken(req: Request, res: Response, next: NextFunc
             return res.status(401).json({error: 'This link was expired'});
         } 
     } else {
-        res.status(200).json({error: 'Could not find the user'});
+        res.status(500).json({error: 'Could not find the user'});
     };
 };

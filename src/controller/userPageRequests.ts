@@ -7,16 +7,6 @@ import { getManager } from 'typeorm';
 import * as validate from '../validate/postAndComment';
 import Follow from '../entity/follow';
 
-// Update the user profile image or theme image
-export async function updateUserImage(req: Request, res: Response){
-    try{
-        await User.update({ id: req['user'].id },{ [req.params.image]: req.body.imgurl });
-        res.status(200).json({message: "Image updated successfully"});
-    } catch(err) {
-        res.status(500).json({error: err.message});
-    }
-};
-
 // Main function to get user's page
 export async function getUserPage(req: Request, res: Response){
     const blackList = ['password', 'follow']
@@ -25,15 +15,16 @@ export async function getUserPage(req: Request, res: Response){
         const user = await getManager()
         .getRepository(User)
         .createQueryBuilder("user")
+        .leftJoinAndSelect("user.post", "p")
         .leftJoinAndMapOne('user.follow', Follow, 'f',
             `f.follower = '${req['user'].id}' and f.user = user.id`)
-        .leftJoinAndSelect("user.post", "p")
         .leftJoinAndMapOne('p.like', Like, 'like',
             `like.user = '${req['user'].id}' and p.id = like.post`)
         .orderBy('p.id','DESC')
         .limit(AMOUNT)
         .where(`user.username = '${req.params.username}'`)
         .loadRelationCountAndMap("user.followers", "user.follow")
+        .loadRelationCountAndMap("user.posts", "user.post")
         .loadRelationCountAndMap('p.comments', 'p.comment')
         .loadRelationCountAndMap('p.likes', 'p.like').getMany();   
 
@@ -52,6 +43,16 @@ export async function getUserPage(req: Request, res: Response){
         }
         else
             res.status(404).json("could not find any user");
+    } catch(err) {
+        res.status(500).json({error: err.message});
+    }
+};
+
+// Update the user profile image or theme image
+export async function updateUserImage(req: Request, res: Response){
+    try{
+        await User.update({ id: req['user'].id },{ [req.params.image]: req.body.imgurl });
+        res.status(200).send();
     } catch(err) {
         res.status(500).json({error: err.message});
     }
@@ -98,6 +99,20 @@ export async function addOrDeleteFollower(req: Request, res: Response){
 export async function deletePost(req: Request, res: Response){
     try{
         await Post.delete({id: req.params.postId, user: req['user'].id})
+        res.status(200).send();
+    }catch(err) {
+        return res.status(500).json({error: err.message});
+    }
+};
+
+// Update the bio
+export async function updateBio(req: Request, res: Response){
+    const { error } = validate.addBioValidation(req.body);
+    if (error)
+        return res.status(400).json({error: error.details[0].message});
+
+    try{
+        await User.update({ id: req['user'].id },{ bio: req.body.bio });
         res.status(200).send();
     }catch(err) {
         return res.status(500).json({error: err.message});
