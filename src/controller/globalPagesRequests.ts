@@ -8,9 +8,56 @@ import { CommentInput } from '../types'
 import Post from '../entity/post';
 import Like from '../entity/likes';
 import User from '../entity/user';
+import Follow from '../entity/follow';
 
 
 const AMOUNT = 20;
+export async function getHomePage(req: Request, res: Response){
+    try{
+        const user = await getManager()
+        .createQueryBuilder(User, "user")        
+        .leftJoin(Follow, 'f', 'user.id = f.followerId')
+        .select('user.username', 'username')
+        .leftJoinAndMapMany('f.posts', Post, 'post', `post.user = f.userId`)
+        .leftJoinAndMapOne('post.users', User, 'u', `post.user = u.id`)
+        .loadRelationCountAndMap('post.comment', 'post.comment')
+        .where(`user.id = '${req['user'].id}'`)
+        .orderBy('post.id','DESC')
+        .execute();
+
+        const temp = await getManager()
+        .createQueryBuilder(User,"user")
+        .leftJoinAndSelect(Follow, 'f', 'user.id = f.followerId')
+        .select('f.userId')
+        .where(`user.id = '${req['user'].id}'`);
+
+        const t = await getManager()
+        .getRepository(Post)
+        .createQueryBuilder("post")     
+        .leftJoinAndSelect("post.user", "u")
+        .where("post.user IN (" + temp.getQuery() + ")")
+        .leftJoinAndMapOne('post.like', Like, 'like',
+            `like.user = '${req['user'].id}' and post.id = like.post`)
+        .loadRelationCountAndMap("u.posts", "u.post")
+        .loadRelationCountAndMap('post.comments', 'post.comment')
+        .loadRelationCountAndMap('post.likes', 'post.like')
+        //.setParameters(temp.getParameters())
+        .orderBy('post.id','DESC')
+        .limit(AMOUNT)
+        .offset(null)
+        .getMany()
+
+
+        if(user)
+            res.status(200).json(t);
+        else
+            res.status(200).send();
+
+    } catch(err){
+        return res.status(500).json({error: err.message});
+    }
+};
+
 export async function addOrDeleteLike(req: Request, res: Response){
     let like : Likes;
     try{
@@ -56,35 +103,18 @@ export async function getComments(req: Request, res: Response){
         .createQueryBuilder("post")
         .leftJoinAndSelect("post.user", "u")
         .leftJoinAndSelect("post.comment", "c")
-        .leftJoinAndSelect("c.user", "userComment")
         .where(`post.id = '${req.params.postId}'`)
-        .loadRelationCountAndMap("post.comments", "post.comment")
-        .loadRelationCountAndMap('post.likes', 'post.like')
+        .leftJoinAndMapOne('c.user', User, 'user',
+            `c.user = user.id`)
         .leftJoinAndMapOne('post.like', Like, 'like',
             `like.user = '${req['user'].id}' and post.id = like.post`)
-        .limit(AMOUNT)
         .orderBy('c.id','DESC')
+        .loadRelationCountAndMap("post.comments", "post.comment")
+        .loadRelationCountAndMap('post.likes', 'post.like')
         .limit(AMOUNT).getMany() 
         
-
-        // const data =  await getManager()
-        // .getRepository(Comment)
-        // .createQueryBuilder("comment")
-        // .leftJoinAndSelect("comment.user", "u")
-        // .orderBy('comment.id','DESC')
-        // .limit(AMOUNT).offset(+req.params.offset)
-        // .where(`comment.post = '${req.params.postId}'`)
-        // .select('comment.id', 'id')
-        // .addSelect('comment.createdAt', 'createdAt')
-        // .addSelect('comment.content', 'content')
-        // .addSelect('u.fullName', 'fullName')
-        // .addSelect('u.username', 'username')
-        // .addSelect('u.profileImage', 'profileImage')
-        // .execute() 
-
-        
         if(user[0]){
-            const result = deeplyFilterUser(user[0]);
+            const result = deeplyFilterUser(user[0], req['user'].username);
             res.status(200).json(result);
         }  
         else
@@ -120,7 +150,6 @@ export async function deleteComment(req: Request, res: Response){
     try{
         await Comment.delete({id: req.params.commentId, user: req['user'].id})
         res.status(200).send();
-  
     } catch(err) {
         return res.status(500).json({error: err.message});
     }
@@ -135,25 +164,27 @@ function createComment (body: CommentInput, id: string){
     return comment;
 }
 
-
 function filterUser(user: User) {
     return _.pick(user, ['id', 'username', 'profileImage']);
 }
 
-function deeplyFilterUser(obj: Object) {
+function filterisMe(user: string, name:string) {
+    return user === name? true : false;
+}
+
+function deeplyFilterUser(obj: Object, username: string) {
     const clonedObj = _.cloneDeep(obj);
     for (let [ key, value ] of Object.entries(clonedObj)) {
-        if (key === 'user') {
+        if (key === 'user'){
             clonedObj[key] = filterUser(value);
+            clonedObj['isMe'] = filterisMe(value.username, username)
         }
 
-        else if (_.isObject(value)) {
-            clonedObj[key] = deeplyFilterUser(value);
-        }
+        else if (_.isObject(value)) 
+            clonedObj[key] = deeplyFilterUser(value, username);
 
-        else if (_.isArray(value)) {
-            clonedObj[key] = value.map(deeplyFilterUser);
-        }
+        else if (_.isArray(value)) 
+            clonedObj[key] = value.map(v => deeplyFilterUser(v, username));
     }
     return clonedObj;
 }

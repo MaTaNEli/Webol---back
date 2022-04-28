@@ -21,7 +21,6 @@ export async function connect(req: Request, res: Response, next: NextFunction) {
 
 // Middleware for new password, special link with special token to decrypt
 export async function resetPassToken(req: Request, res: Response, next: NextFunction) {
-   
     const token = req.header('mail_token');
     if (!token) return res.status(401).json({error: "Access Denied"});
     

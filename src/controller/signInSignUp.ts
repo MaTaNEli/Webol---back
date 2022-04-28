@@ -16,8 +16,8 @@ export async function registerPosts(req: Request, res: Response){
         // Check if user is in DB
         const result = await User.findOne({ 
             where: [
-                { email: req.body.email },
-                { username: req.body.username }
+                { email: req.body.email.trim() },
+                { username: req.body.username.trim() }
             ],
             select: ['username', 'email']
         });
@@ -58,7 +58,7 @@ export async function logInPost(req: Request, res: Response){
         return res.status(400).json({error: "Email or Password are incorrect"});
 
     let result: User;
-    console.log(req.body)
+    
     try{
         // Check if user is in DB
         result = await User.findOne({ 
@@ -71,7 +71,7 @@ export async function logInPost(req: Request, res: Response){
     } catch(err) {
         return res.status(500).json({error: err.message});
     }
-    console.log(result)
+    
     try{
         if(result && await bcrypt.compare(req.body.password, result.password)){
             const token = createToken(result.id, result.username)
@@ -96,7 +96,7 @@ export async function googleLogIn(req: Request, res: Response){
     // Create a user
     try{
         user = await User.findOne({
-            where:{email: req.body.email},
+            where:{email: req.body.email.trim()},
             select:['id', 'username']
         });
         if(!user){

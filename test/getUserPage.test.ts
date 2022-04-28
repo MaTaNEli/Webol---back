@@ -3,7 +3,7 @@ dotenv.config();
 import { getConnection } from "typeorm"
 import User from '../src/entity/user';
 import { initStorage } from '../src/storage';
-import { loginRequest, registerRequest, addPostRequest } from './utilities/apiFunctions';
+import { loginRequest, registerRequest, getUserRequest } from './utilities/apiFunctions';
 import { createFullUserDetails } from './utilities/utilitiesFunctions';
 
 
@@ -34,13 +34,16 @@ describe("User page request - add post functions", () =>{
     //     } 
     // });
 
-    test("When post not connected respond with a status code of 401", async () => {
-        const result = await addPostRequest(post, null);
+    test("When get try to get user page buy bot connected statuse code sould be 401", async () => {
+        const body = createFullUserDetails();
+        const registerRes = await registerRequest(body)
+        expect(registerRes.statusCode).toBe(200);
+        
+        const result = await getUserRequest(null, body.username); 
         expect(result.statusCode).toBe(401);
-        expect(result.text).toBe("{\"error\":\"Access Denide\"}" );
     });
 
-    test("When post, respond with a status code of 201", async () => {
+    test("When get try to get my page and connect expect status code to be 200", async () => {
         const body = createFullUserDetails();
         const registerRes = await registerRequest(body)
         expect(registerRes.statusCode).toBe(200);
@@ -52,15 +55,21 @@ describe("User page request - add post functions", () =>{
         const loginRes = await loginRequest(user)
         expect(loginRes.statusCode).toBe(200)
 
-        const result = await addPostRequest(post, loginRes.body['UserInfo'].auth_token);
-        expect(result.statusCode).toBe(201);
+        const result = await getUserRequest(loginRes.body['UserInfo'].auth_token, body.username);
+        expect(result.statusCode).toBe(200);
+        expect(result.body[0]).toBe(true);
+        expect(result.body[1]).toBe(true);
     });
     
-    test("When post with content null in the post, respond with a status code of 400", async () => {
+    test("When get try to get someone page and connect buy not following after", async () => {
         const body = createFullUserDetails();
         const registerRes = await registerRequest(body)
         expect(registerRes.statusCode).toBe(200);
         
+        const otherBody = createFullUserDetails();
+        const otherRegisterRes = await registerRequest(otherBody)
+        expect(otherRegisterRes.statusCode).toBe(200);
+
         const user = {
             username: body.username,
             password: body.password
@@ -68,28 +77,34 @@ describe("User page request - add post functions", () =>{
         const loginRes = await loginRequest(user)
         expect(loginRes.statusCode).toBe(200)
 
-        post.description = null;
-        const result = await addPostRequest(post, loginRes.body['UserInfo'].auth_token);
-        expect(result.statusCode).toBe(400);
-        expect(result.text).toBe("{\"error\":\"\\\"description\\\" must be a string\"}");
+        const result = await getUserRequest(loginRes.body['UserInfo'].auth_token, otherBody.username);
+        expect(result.statusCode).toBe(200);
+        expect(result.body[0]).toBe(false);
+        expect(result.body[1]).toBe(false);
     });
 
-    test("When post with content empty in the post, respond with a status code of 400", async () => {
-        const body = createFullUserDetails();
-        const registerRes = await registerRequest(body)
-        expect(registerRes.statusCode).toBe(200);
+
+    // test("When get try to get someone page and connect and following after", async () => {
+    //     const body = createFullUserDetails();
+    //     const registerRes = await registerRequest(body)
+    //     expect(registerRes.statusCode).toBe(200);
         
-        const user = {
-            username: body.username,
-            password: body.password
-        };
-        const loginRes = await loginRequest(user)
-        expect(loginRes.statusCode).toBe(200)
+    //     const otherBody = createFullUserDetails();
+    //     const otherRegisterRes = await registerRequest(otherBody)
+    //     expect(otherRegisterRes.statusCode).toBe(200);
 
-        post.description = "";
-        const result = await addPostRequest(post, loginRes.body['UserInfo'].auth_token);
-        expect(result.statusCode).toBe(400);
-        expect(result.text).toBe("{\"error\":\"\\\"description\\\" is not allowed to be empty\"}");
-    });
+    //     const user = {
+    //         username: body.username,
+    //         password: body.password
+    //     };
+    //     const loginRes = await loginRequest(user)
+    //     expect(loginRes.statusCode).toBe(200)
 
+    //     const result = await getUserRequest(loginRes.body['UserInfo'].auth_token, otherBody.username);
+    //     expect(result.statusCode).toBe(200);
+    //     expect(result.body[0]).toBe(false);
+    //     expect(result.body[1]).toBe(false);
+
+    //     // write to add follow function and call get getUserRequest again
+    // });
 });

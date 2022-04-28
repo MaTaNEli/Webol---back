@@ -24,3 +24,10 @@ export async function addPostRequest (body: {description: string, url: string}, 
     else 
         return await request(app).post("/user/addpost").send(body);
 };
+
+export async function getUserRequest (token: string, username: string){
+    if(token)
+        return await  request(app).get(`/user/${username}`).set('auth_token', token).send();
+    else 
+        return await request(app).get(`/user/${username}`).send();
+};

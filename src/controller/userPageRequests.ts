@@ -5,6 +5,7 @@ import Like from '../entity/likes';
 import _ from 'lodash';
 import { getManager } from 'typeorm';
 import * as validate from '../validate/postAndComment';
+import { userNameValidation } from '../validate/userValidate';
 import Follow from '../entity/follow';
 
 // Main function to get user's page
@@ -112,10 +113,24 @@ export async function updateBio(req: Request, res: Response){
         return res.status(400).json({error: error.details[0].message});
 
     try{
-        await User.update({ id: req['user'].id },{ bio: req.body.bio });
+        await User.update({ id: req['user'].id },{ bio: req.body.bio.trim() });
         res.status(200).send();
     }catch(err) {
         return res.status(500).json({error: err.message});
+    }
+};
+
+// Update the username
+export async function updateUsername(req: Request, res: Response){
+    const { error } = userNameValidation(req.body);
+    if (error)
+        return res.status(400).json({error: error.details[0].message});
+
+    try{
+        await User.update({ id: req['user'].id },{ username: req.body.username.trim() });
+        res.status(200).send();
+    }catch(err) {
+        return res.status(400).json({error: 'Username is already exist'});
     }
 };
 
