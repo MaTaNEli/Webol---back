@@ -5,12 +5,10 @@ import Like from '../entity/likes';
 import _ from 'lodash';
 import { getManager } from 'typeorm';
 import * as validate from '../validate/postAndComment';
-import { userNameValidation } from '../validate/userValidate';
 import Follow from '../entity/follow';
 
 // Main function to get user's page
 export async function getUserPage(req: Request, res: Response){
-    const blackList = ['password', 'follow']
     const AMOUNT = 20;
     try{
         const user = await getManager()
@@ -22,38 +20,19 @@ export async function getUserPage(req: Request, res: Response){
         .leftJoinAndMapOne('p.like', Like, 'like',
             `like.user = '${req['user'].id}' and p.id = like.post`)
         .orderBy('p.id','DESC')
-        .limit(AMOUNT)
+        .limit(AMOUNT).offset(null)
         .where(`user.username = '${req.params.username}'`)
         .loadRelationCountAndMap("user.followers", "user.follow")
         .loadRelationCountAndMap("user.posts", "user.post")
         .loadRelationCountAndMap('p.comments', 'p.comment')
         .loadRelationCountAndMap('p.likes', 'p.like').getMany();   
 
-        if(user) {
-            let data = [];
-            const isMe = user[0].id == req['user'].id;
-            data.push(isMe);
-            data.push(user[0].follow || isMe ? true : false);
-            data.push(user[0].follow || isMe ? 
-                _(user[0]).pickBy((v, k) => !blackList.includes(k)).value()
-                :
-                _(user[0]).pickBy((v, k) => !blackList.includes(k) && k != "post").value()
-                );
-
+        if(user) {     
+            const data = fixData(user, req['user'].id);
             res.status(200).json(data);
         }
         else
             res.status(404).json("could not find any user");
-    } catch(err) {
-        res.status(500).json({error: err.message});
-    }
-};
-
-// Update the user profile image or theme image
-export async function updateUserImage(req: Request, res: Response){
-    try{
-        await User.update({ id: req['user'].id },{ [req.params.image]: req.body.imgurl });
-        res.status(200).send();
     } catch(err) {
         res.status(500).json({error: err.message});
     }
@@ -106,35 +85,21 @@ export async function deletePost(req: Request, res: Response){
     }
 };
 
-// Update the bio
-export async function updateBio(req: Request, res: Response){
-    const { error } = validate.addBioValidation(req.body);
-    if (error)
-        return res.status(400).json({error: error.details[0].message});
-
-    try{
-        await User.update({ id: req['user'].id },{ bio: req.body.bio.trim() });
-        res.status(200).send();
-    }catch(err) {
-        return res.status(500).json({error: err.message});
-    }
-};
-
-// Update the username
-export async function updateUsername(req: Request, res: Response){
-    const { error } = userNameValidation(req.body);
-    if (error)
-        return res.status(400).json({error: error.details[0].message});
-
-    try{
-        await User.update({ id: req['user'].id },{ username: req.body.username.trim() });
-        res.status(200).send();
-    }catch(err) {
-        return res.status(400).json({error: 'Username is already exist'});
-    }
-};
-
 //------------------------------- Create functions -----------------------------------
+function fixData(user: User[], id: string){
+    const blackList = ['password', 'follow']
+    let data = [];
+        const isMe = user[0].id == id;
+        data.push(isMe);
+        data.push(user[0].follow || isMe ? true : false);
+        data.push(user[0].follow || isMe ? 
+            _(user[0]).pickBy((v, k) => !blackList.includes(k)).value()
+            :
+            _(user[0]).pickBy((v, k) => !blackList.includes(k) && k != "post").value()
+            );
+    return data;
+}
+
 function createPost (body: Post, id: string){
     const post = new Post;
     post.description = body.description;

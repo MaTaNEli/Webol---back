@@ -14,42 +14,30 @@ import Follow from '../entity/follow';
 const AMOUNT = 20;
 export async function getHomePage(req: Request, res: Response){
     try{
-        const user = await getManager()
-        .createQueryBuilder(User, "user")        
-        .leftJoin(Follow, 'f', 'user.id = f.followerId')
-        .select('user.username', 'username')
-        .leftJoinAndMapMany('f.posts', Post, 'post', `post.user = f.userId`)
-        .leftJoinAndMapOne('post.users', User, 'u', `post.user = u.id`)
-        .loadRelationCountAndMap('post.comment', 'post.comment')
-        .where(`user.id = '${req['user'].id}'`)
-        .orderBy('post.id','DESC')
-        .execute();
-
-        const temp = await getManager()
+        const subQ = await getManager()
         .createQueryBuilder(User,"user")
         .leftJoinAndSelect(Follow, 'f', 'user.id = f.followerId')
         .select('f.userId')
         .where(`user.id = '${req['user'].id}'`);
 
-        const t = await getManager()
+        const result = await getManager()
         .getRepository(Post)
         .createQueryBuilder("post")     
         .leftJoinAndSelect("post.user", "u")
-        .where("post.user IN (" + temp.getQuery() + ")")
+        .where("post.user IN (" + subQ.getQuery() + ")")
         .leftJoinAndMapOne('post.like', Like, 'like',
             `like.user = '${req['user'].id}' and post.id = like.post`)
-        .loadRelationCountAndMap("u.posts", "u.post")
         .loadRelationCountAndMap('post.comments', 'post.comment')
         .loadRelationCountAndMap('post.likes', 'post.like')
-        //.setParameters(temp.getParameters())
         .orderBy('post.id','DESC')
-        .limit(AMOUNT)
-        .offset(null)
+        .limit(AMOUNT).offset(null)
         .getMany()
 
 
-        if(user)
-            res.status(200).json(t);
+        if(result){
+            const info = deeplyFilterUser(result, req['user'].username);;
+            res.status(201).json(info);
+        }
         else
             res.status(200).send();
 
@@ -78,7 +66,7 @@ export async function addOrDeleteLike(req: Request, res: Response){
         }
     }else{
         await Likes.remove(like);
-        res.status(200).send();
+        res.status(201).send();
     } 
 };
 

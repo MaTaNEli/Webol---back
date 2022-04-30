@@ -1,4 +1,4 @@
-import bcrypt, { hashSync } from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import * as validate from '../validate/registerValidate';
 import * as passEmailVer from '../mailer/passverification';

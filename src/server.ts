@@ -14,6 +14,7 @@ app.use(cors({credentials: true, origin: '*'}));
 import signInSignUp from './routes/signInSignUp';
 import userRequest from './routes/userRequest';
 import globalRequest from './routes/globalRequest';
+import userSettings from './routes/userSetting';
 import s3 from './routes/s3';
 
 function errHandler(req: Request, res: Response){
@@ -21,10 +22,11 @@ function errHandler(req: Request, res: Response){
 }
 
 // Routes
+app.use('/s3', s3);
 app.use('/', signInSignUp);
 app.use('/user', userRequest);
+app.use('/update', userSettings);
 app.use('/global', globalRequest);
-app.use('/s3', s3);
 
 //Get all the err without crash
 app.use(errHandler);
