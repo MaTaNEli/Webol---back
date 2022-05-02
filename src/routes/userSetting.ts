@@ -5,10 +5,12 @@ const router = express.Router();
 
 // ----------- Auth Post Routes -----------
 router.post('/userimage/:image', verify.connect, controller.updateUserImage);
-router.post('/updatebio', verify.connect, controller.updateBio);
+router.put('/updatesettings', verify.connect, controller.updateSettings);
+router.put('/updatebio', verify.connect, controller.updateBio);
 router.post('/updateusername', verify.connect, controller.updateUsername);
 router.post('/updatefullname', verify.connect, controller.updateFullname);
 router.post('/updatepassword', verify.connect, controller.updatePassword);
 // ----------- Auth Get Routes -----------
+router.get('/userinfo', verify.connect, controller.getUserInfo);
 
 export default router;

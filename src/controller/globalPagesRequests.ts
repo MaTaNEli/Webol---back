@@ -25,12 +25,14 @@ export async function getHomePage(req: Request, res: Response){
         .createQueryBuilder("post")     
         .leftJoinAndSelect("post.user", "u")
         .where("post.user IN (" + subQ.getQuery() + ")")
+        .orWhere(`post.user = '${req['user'].id}'`)
         .leftJoinAndMapOne('post.like', Like, 'like',
             `like.user = '${req['user'].id}' and post.id = like.post`)
         .loadRelationCountAndMap('post.comments', 'post.comment')
         .loadRelationCountAndMap('post.likes', 'post.like')
         .orderBy('post.id','DESC')
-        .limit(AMOUNT).offset(null)
+        .limit(AMOUNT).offset(+req.params.offset)
+        .distinct(true)
         .getMany()
 
 
@@ -99,6 +101,7 @@ export async function getComments(req: Request, res: Response){
         .orderBy('c.id','DESC')
         .loadRelationCountAndMap("post.comments", "post.comment")
         .loadRelationCountAndMap('post.likes', 'post.like')
+        .distinct(true)
         .limit(AMOUNT).getMany() 
         
         if(user[0]){
@@ -163,7 +166,10 @@ function filterisMe(user: string, name:string) {
 function deeplyFilterUser(obj: Object, username: string) {
     const clonedObj = _.cloneDeep(obj);
     for (let [ key, value ] of Object.entries(clonedObj)) {
-        if (key === 'user'){
+        if(key === 'createdAt')  
+            clonedObj[key]  = value.toLocaleString();
+        
+        else if (key === 'user'){
             clonedObj[key] = filterUser(value);
             clonedObj['isMe'] = filterisMe(value.username, username)
         }

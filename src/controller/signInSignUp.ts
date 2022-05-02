@@ -66,7 +66,7 @@ export async function logInPost(req: Request, res: Response){
                 { email: req.body.username.trim() },
                 { username: req.body.username.trim() }
             ],
-            select: ['id', 'password', 'username'] 
+            select: ['id', 'password', 'username', 'profileImage'] 
         });
     } catch(err) {
         return res.status(500).json({error: err.message});
@@ -77,6 +77,7 @@ export async function logInPost(req: Request, res: Response){
             const token = createToken(result.id, result.username)
             
             const UserInfo = {
+                profileImage: result.profileImage,
                 username: result.username,
                 auth_token: token                    
             }
@@ -97,7 +98,7 @@ export async function googleLogIn(req: Request, res: Response){
     try{
         user = await User.findOne({
             where:{email: req.body.email.trim()},
-            select:['id', 'username']
+            select:['id', 'username', 'profileImage']
         });
         if(!user){
             // Generate username
@@ -117,7 +118,7 @@ export async function googleLogIn(req: Request, res: Response){
         try{
             user = await User.findOne({ 
                 where:{ email: req.body.email },
-                select: ['id', 'username']
+                select: ['id', 'username', 'profileImage']
             });
         } catch(err) {
             return res.status(500).json({error: err.message});
@@ -127,6 +128,7 @@ export async function googleLogIn(req: Request, res: Response){
     if(user){
         const token = createToken(user.id, user.username)
         const UserInfo = {
+            profileImage: user.profileImage,
             username: user.username,
             auth_token: token                    
         };

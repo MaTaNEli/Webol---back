@@ -9,23 +9,29 @@ export function userNameValidation(data : {username: string}) {
 
 export function fullNameValidation(data : {fullName: string}) {
     const schema = Joi.object({
-        fullName: Joi.string().required()
+        fullName: Joi.string().required().max(30)
     });
     return schema.validate(data);  
 };
 
-export function newPasswordValidation(data : {oldPassword: string, newPass: string, confirm: string}) {
+export function addBioValidation(data : {bio:string}) {
     const schema = Joi.object({
-        oldPassword: Joi.string()
+        bio: Joi.string().max(150)
+    });
+    return schema.validate(data);  
+};
+
+export function newPasswordValidation(data : {password: string, newPassword: string, retypePassword: string}) {
+    const schema = Joi.object({
+        password: Joi.string()
             .required()
             .min(8),
-        newPass: Joi.string()
+        newPassword: Joi.string()
             .required()
             .min(8),
-        confirm: Joi.string()
+        retypePassword: Joi.string()
             .required()
             .min(8)
-            .valid(Joi.ref('newPass'))
     });
     return schema.validate(data);  
 };

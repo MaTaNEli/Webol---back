@@ -9,8 +9,10 @@ router.post('/addcomment', verify.connect, controller.addComment);
 
 // ----------- Auth Get Routes -----------
 router.get('/addordeletelike/:postId', verify.connect, controller.addOrDeleteLike);
-router.get('/gethomepage', verify.connect, controller.getHomePage);
+router.get('/gethomepage/:offset', verify.connect, controller.getHomePage);
 router.get('/getcomments/:postId', verify.connect, controller.getComments);
 router.get('/getlikes/:postId/:offset', verify.connect, controller.getLikes);
-router.get('/deletecomment/:commentId', verify.connect, controller.deleteComment);
+
+// ----------- Auth Delete Routes -----------
+router.delete('/deletecomment/:commentId', verify.connect, controller.deleteComment);
 export default router;

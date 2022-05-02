@@ -9,7 +9,6 @@ app.use(express.urlencoded({extended: true}));
 app.use(cors({credentials: true, origin: '*'}));
 //app.use(cors({credentials: true, origin: 'http://localhost:3000'}));
 
-
 // Fetch all the routes for the application
 import signInSignUp from './routes/signInSignUp';
 import userRequest from './routes/userRequest';

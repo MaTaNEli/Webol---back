@@ -9,12 +9,7 @@ export function addPostValidation(data : PostInput) {
     return schema.validate(data);  
 };
 
-export function addBioValidation(data : {bio:string}) {
-    const schema = Joi.object({
-        bio: Joi.string()
-    });
-    return schema.validate(data);  
-};
+
 
 export function addCommentValidation(data : CommentInput) {
     const schema = Joi.object({

@@ -6,10 +6,10 @@ import _ from 'lodash';
 import { getManager } from 'typeorm';
 import * as validate from '../validate/postAndComment';
 import Follow from '../entity/follow';
+const AMOUNT = 20;
 
 // Main function to get user's page
 export async function getUserPage(req: Request, res: Response){
-    const AMOUNT = 20;
     try{
         const user = await getManager()
         .getRepository(User)
@@ -20,13 +20,14 @@ export async function getUserPage(req: Request, res: Response){
         .leftJoinAndMapOne('p.like', Like, 'like',
             `like.user = '${req['user'].id}' and p.id = like.post`)
         .orderBy('p.id','DESC')
-        .limit(AMOUNT).offset(null)
+        .limit(AMOUNT)
         .where(`user.username = '${req.params.username}'`)
         .loadRelationCountAndMap("user.followers", "user.follow")
         .loadRelationCountAndMap("user.posts", "user.post")
         .loadRelationCountAndMap('p.comments', 'p.comment')
         .loadRelationCountAndMap('p.likes', 'p.like').getMany();   
-
+        
+        
         if(user) {     
             const data = fixData(user, req['user'].id);
             res.status(200).json(data);
@@ -35,6 +36,31 @@ export async function getUserPage(req: Request, res: Response){
             res.status(404).json("could not find any user");
     } catch(err) {
         res.status(500).json({error: err.message});
+    }
+};
+
+// Main function to get user's page when scrolling down
+export async function getMoreUserPost(req: Request, res: Response){
+    try{
+        const data = await getManager()
+        .getRepository(Post)
+        .createQueryBuilder("post")
+        .leftJoin("post.user", "user", 'user.id = post.userId')
+        .leftJoin('user.follow','follow', 'user.id = follow.userId')
+        .leftJoinAndMapOne('post.like', Like, 'like',
+            `like.user = '${req['user'].id}' and post.id = like.post`)
+        .where(`follow.followerId = '${req['user'].id}' AND user.username = '${req.params.username}'`)
+        .orWhere(`user.username = '${req.params.username}' AND post.userId = '${req['user'].id}'
+                AND user.id = '${req['user'].id}'`)
+        .distinct(true)
+        .limit(20).offset(+req.params.offset)
+        .orderBy('post.id','DESC')
+        .loadRelationCountAndMap('post.comments', 'post.comment')
+        .loadRelationCountAndMap('post.likes', 'post.like').getMany(); 
+
+        res.status(201).send(data);
+    }catch(err) {
+        return res.status(500).json({error: err.message});
     }
 };
 
@@ -71,7 +97,7 @@ export async function addOrDeleteFollower(req: Request, res: Response){
         }
     } else {
         await Follow.remove(follow);
-        res.status(200).send();
+        res.status(201).send();
     }
 };
 
@@ -79,7 +105,7 @@ export async function addOrDeleteFollower(req: Request, res: Response){
 export async function deletePost(req: Request, res: Response){
     try{
         await Post.delete({id: req.params.postId, user: req['user'].id})
-        res.status(200).send();
+        res.status(201).send();
     }catch(err) {
         return res.status(500).json({error: err.message});
     }
@@ -87,6 +113,7 @@ export async function deletePost(req: Request, res: Response){
 
 //------------------------------- Create functions -----------------------------------
 function fixData(user: User[], id: string){
+    fixDate(user);
     const blackList = ['password', 'follow']
     let data = [];
         const isMe = user[0].id == id;
@@ -98,6 +125,12 @@ function fixData(user: User[], id: string){
             _(user[0]).pickBy((v, k) => !blackList.includes(k) && k != "post").value()
             );
     return data;
+}
+
+function fixDate(data: Array<any>){
+    for(let date of data[0].post)
+        if(date.createdAt)
+            date.createdAt = date.createdAt.toLocaleString()
 }
 
 function createPost (body: Post, id: string){
