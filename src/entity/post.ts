@@ -1,4 +1,4 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, ManyToOne, OneToMany, CreateDateColumn } from "typeorm";
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, ManyToOne, OneToMany, CreateDateColumn, Index } from "typeorm";
 import User from './user';
 import Comment from './comment'
 import Likes from "./likes";
@@ -18,6 +18,7 @@ export default class Post extends BaseEntity {
     @Column({ nullable: true })
     url: string;
 
+    @Index()
     @ManyToOne(() => User, (user: User) => user.post, {onDelete: "CASCADE", onUpdate: "CASCADE"})
     user: string;
 

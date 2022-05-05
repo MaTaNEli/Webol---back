@@ -8,7 +8,7 @@ const router = express.Router();
 router.post('/addcomment', verify.connect, controller.addComment);
 
 // ----------- Auth Get Routes -----------
-router.get('/addordeletelike/:postId', verify.connect, controller.addOrDeleteLike);
+router.get('/addordeletelike/:postId/:userId', verify.connect, controller.addOrDeleteLike);
 router.get('/gethomepage/:offset', verify.connect, controller.getHomePage);
 router.get('/getcomments/:postId', verify.connect, controller.getComments);
 router.get('/getlikes/:postId/:offset', verify.connect, controller.getLikes);

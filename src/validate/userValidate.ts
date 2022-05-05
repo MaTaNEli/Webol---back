@@ -21,7 +21,7 @@ export function addBioValidation(data : {bio:string}) {
     return schema.validate(data);  
 };
 
-export function newPasswordValidation(data : {password: string, newPassword: string, retypePassword: string}) {
+export function newPasswordValidation(data : {password: string, newPassword: string, passwordConfirmation: string}) {
     const schema = Joi.object({
         password: Joi.string()
             .required()
@@ -29,7 +29,7 @@ export function newPasswordValidation(data : {password: string, newPassword: str
         newPassword: Joi.string()
             .required()
             .min(8),
-        retypePassword: Joi.string()
+        passwordConfirmation: Joi.string()
             .required()
             .min(8)
     });

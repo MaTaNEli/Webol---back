@@ -6,6 +6,7 @@ import _ from 'lodash';
 import { getManager } from 'typeorm';
 import * as validate from '../validate/postAndComment';
 import Follow from '../entity/follow';
+import { addNotification } from './topBarRequest';
 const AMOUNT = 20;
 
 // Main function to get user's page
@@ -98,6 +99,11 @@ export async function addOrDeleteFollower(req: Request, res: Response){
     } else {
         await Follow.remove(follow);
         res.status(201).send();
+    }
+
+    if(!follow){
+        const message = `${req['user'].username} is following you`;
+        addNotification(message, req.params.userToFollowId, null, req['user'].id);
     }
 };
 

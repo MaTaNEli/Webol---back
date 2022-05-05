@@ -9,7 +9,7 @@ import Post from '../entity/post';
 import Like from '../entity/likes';
 import User from '../entity/user';
 import Follow from '../entity/follow';
-
+import { addNotification } from './topBarRequest';
 
 const AMOUNT = 20;
 export async function getHomePage(req: Request, res: Response){
@@ -34,7 +34,6 @@ export async function getHomePage(req: Request, res: Response){
         .limit(AMOUNT).offset(+req.params.offset)
         .distinct(true)
         .getMany()
-
 
         if(result){
             const info = deeplyFilterUser(result, req['user'].username);;
@@ -62,14 +61,20 @@ export async function addOrDeleteLike(req: Request, res: Response){
             like.user = req['user'].id;
             like.post = req.params.postId;
             await like.save();
-            res.status(201).send();
+
+            res.status(201).send(); 
         }catch(err) {
             return res.status(500).json({error: err.message});
         }
     }else{
         await Likes.remove(like);
         res.status(201).send();
-    } 
+    }
+
+    if(!like){
+        const message = `${req['user'].username} liked your post`;
+        addNotification(message, req.params.userId, req.params.postId, req['user'].id);
+    }
 };
 
 export async function addComment(req: Request, res: Response){
@@ -79,11 +84,15 @@ export async function addComment(req: Request, res: Response){
         return res.status(400).json({error: error.details[0].message});
 
     try{
-        await createComment(req.body, req['user'].id).save()
+        await createComment(req.body, req['user'].id).save()        
         res.status(201).send();
     }catch(err) {
         return res.status(500).json({error: err.message});
     }
+
+    const message = `${req['user'].username} comment your post`;
+    addNotification(message, req.body.userId, req.body.postId, req['user'].id);
+    
 };
 
 export async function getComments(req: Request, res: Response){
