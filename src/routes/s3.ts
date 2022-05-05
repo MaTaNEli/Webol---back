@@ -1,6 +1,6 @@
 import * as express from 'express';
 import * as s3 from '../s3Connect/s3';
-import * as verify from './verifyToken';
+import * as verify from '../token/verifyToken';
 
 const router = express.Router();
 

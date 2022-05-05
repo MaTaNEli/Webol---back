@@ -1,6 +1,6 @@
 import * as express from 'express';
 import * as controller from '../controller/topBarRequest';
-import * as verify from './verifyToken';
+import * as verify from '../token/verifyToken';
 
 const router = express.Router();
 
