@@ -82,7 +82,6 @@ export async function addComment(req: Request, res: Response){
     const { error } = validate.addCommentValidation(req.body);
     if (error)
         return res.status(400).json({error: error.details[0].message});
-
     try{
         await createComment(req.body, req['user'].id).save()        
         res.status(201).send();

@@ -3,6 +3,7 @@ import User from '../entity/user';
 import bcrypt from 'bcryptjs';
 import _ from 'lodash';
 import * as validate from '../validate/userValidate';
+import { createToken } from './signInSignUp';
 
 // get the user profile information
 export async function getUserInfo(req: Request, res: Response){
@@ -28,20 +29,16 @@ export async function updateUserImage(req: Request, res: Response){
 export async function updateSettings(req: Request, res: Response){
     const errorMessage = {bio: null, fullName: null, password: null, username: null}
     validateTheInput(req.body, errorMessage);
-    
-    // if(errorMessage.bio || errorMessage.fullName || errorMessage.password || errorMessage.username)
-    //     return res.status(400).json(errorMessage);
 
     const data = dinamicData(req.body)
     
     try{
         const username = await User.findOne({where: {username: req.body.username}, select : ['username']});
         if(username && username.username != req['user'].username)
-            errorMessage.username = 'Username is already exist'
-  
+            errorMessage.username = 'Username is already exist';
+
+        const user = await User.findOne({where: {id: req['user'].id}, select : ['password', 'username']});
         if(data.password){
-            const user = await User.findOne({where: {id: req['user'].id}, select : ['password']});
-            
             if (await bcrypt.compare(req.body.password, user.password) && !errorMessage.password)
             {
                 const salt = await bcrypt.genSalt(12);
@@ -49,8 +46,7 @@ export async function updateSettings(req: Request, res: Response){
                 data['password'] = hashpass;
                 await User.update({ id: req['user'].id }, data);
                 
-            }else
-            {
+            }else{
                 if(!errorMessage.password)
                     errorMessage.password = 'Password is incorrect';
                 return res.status(400).json(errorMessage);
@@ -59,7 +55,13 @@ export async function updateSettings(req: Request, res: Response){
         }else
             await User.update({ id: req['user'].id }, data);
             
-        res.status(200).send();
+        const token = createToken(req['user'].id, data.username? data.username : user.username);
+        const UserInfo = {
+            username: user.username,
+            auth_token: token                    
+        }
+        res.status(200).send(UserInfo);
+        
     }catch{
         return res.status(400).json(errorMessage);
     }

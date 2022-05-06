@@ -218,7 +218,7 @@ function createUser(fullName: string, email: string, username: string){
     return user;
 };
 
-function createToken(id: string, username: string){
+export function createToken(id: string, username: string){
     const tokenUser = {
         id: id,
         username: username

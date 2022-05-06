@@ -7,7 +7,6 @@ const router = express.Router();
 // ----------- Auth Get Routes -----------
 router.get('/getnotification', verify.connect, controller.getNotifications);
 router.get('/getcountnotification', verify.connect, controller.countNotifications);
-router.get('/deletenotifications', verify.connect, controller.deleteNotifications);
 // ----------- Auth Delete Routes -----------
 
 export default router;

@@ -1,14 +1,7 @@
 import { Request, Response } from 'express';
-import Comment from '../entity/comment';
 import _ from 'lodash';
-import * as validate from '../validate/postAndComment';
-import Likes from '../entity/likes';
 import { getManager } from 'typeorm';
-import { CommentInput } from '../types'
-import Post from '../entity/post';
-import Like from '../entity/likes';
 import User from '../entity/user';
-import Follow from '../entity/follow';
 import Notification from '../entity/notification';
 
 export async function countNotifications(req: Request, res: Response){
@@ -40,16 +33,9 @@ export async function getNotifications(req: Request, res: Response){
         .addSelect('notification.postId', 'postId')
         .execute()
 
-        res.status(201).json(notification);
-    } catch(err) {
-        return res.status(500).json({error: err.message});
-    }
-};
-
-export async function deleteNotifications(req: Request, res: Response){
-    try{
         await Notification.update({ userId: req['user'].id, read: false },{ read: true });
-        res.status(200).json();
+        res.status(201).json(notification);
+        
     } catch(err) {
         return res.status(500).json({error: err.message});
     }
