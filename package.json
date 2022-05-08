@@ -4,7 +4,8 @@
   "description": "",
   "main": "src/app.js",
   "scripts": {
-    "start": "nodemon",
+    "start": "ts-node ./src/app.ts",
+    "nodemon": "nodemon",
     "test": "jest"
   },
   "repository": {

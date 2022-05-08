@@ -52,6 +52,7 @@ export async function registerPosts(req: Request, res: Response){
 };
 
 export async function logInPost(req: Request, res: Response){
+    console.log(1)
     // Validate the data
     const { error } = validate.loginValidation(req.body);
     if (error)
