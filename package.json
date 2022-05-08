@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "main": "./src/app.ts",
-  "type": "module",
+  
   "scripts": {
     "start": "node .",
     "start:dev": "ts-node index.ts",
     "build": "tsc",
-    "web": "ts-node ./src/app.ts"
+    "web": "ts-node ./src/app.ts",
+    "dev": "nodemon"
   },
   "repository": {
     "type": "git",
