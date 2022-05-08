@@ -4,9 +4,8 @@
   "description": "",
   "main": "src/app.js",
   "scripts": {
-    "start": "ts-node ./src/app.ts",
-    "build": "webpack",
-    "test": "jest"
+    "start": "ts-node src/app.ts"
+    
   },
   
   "repository": {

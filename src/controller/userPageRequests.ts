@@ -11,7 +11,6 @@ const AMOUNT = 20;
 
 // Main function to get user's page
 export async function getUserPage(req: Request, res: Response){
-    console.log(11)
     try{
         const user = await getManager()
         .getRepository(User)
