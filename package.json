@@ -4,7 +4,8 @@
   "description": "",
   "main": "./src/app.ts",
   "scripts": {
-    "start": "ts-node ./src/app.ts",
+    "start": "node .",
+    "start:dev": "ts-node index.ts",
     "build": "tsc",
     "web": "ts-node ./src/app.ts"
   },
