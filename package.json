@@ -4,7 +4,7 @@
   "description": "",
   "main": "./src/app.ts",
   "scripts": {
-    "start": "ts-node --max-old-space-size=1536 ./src/app.ts",
+    "start": "node --max_old_space_size=1536 --require ts-node/register ./src/app.ts",
     "dev": "nodemon",
     "test": "jest"
   },
