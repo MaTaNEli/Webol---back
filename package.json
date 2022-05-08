@@ -8,6 +8,7 @@
     "build": "webpack",
     "test": "jest"
   },
+  "heroku-run-build-script": true,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/MaTaNEli/Webol---hadassah.git"
