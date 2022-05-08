@@ -5,7 +5,8 @@
   "main": "./src/app.ts",
   "scripts": {
     "start": "ts-node ./src/app.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "web": "ts-node ./src/app.ts"
   },
   "repository": {
     "type": "git",
