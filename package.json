@@ -5,6 +5,8 @@
   "main": "src/app.js",
   "scripts": {
     "start": "ts-node src/app.ts",
+    "build": "tsc",
+    "postinstall": "npm run build",
     "test": "jest"
   },
   
