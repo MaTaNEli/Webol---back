@@ -5,8 +5,8 @@
   "main": "./src/app.ts",
   "scripts": {
     "start": "ts-node ./src/app.ts",
-    "build": "tsc",
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
