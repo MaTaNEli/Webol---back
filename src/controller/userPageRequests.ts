@@ -20,21 +20,19 @@ export async function getUserPage(req: Request, res: Response){
             `f.follower = '${req['user'].id}' and f.user = user.id`)
         .leftJoinAndMapOne('p.like', Like, 'like',
             `like.user = '${req['user'].id}' and p.id = like.post`)
-        .orderBy('p.id','DESC')
-        .limit(AMOUNT)
+        .orderBy('p.id','DESC').limit(AMOUNT)
         .where(`user.username = '${req.params.username}'`)
         .loadRelationCountAndMap("user.followers", "user.follow")
         .loadRelationCountAndMap("user.posts", "user.post")
         .loadRelationCountAndMap('p.comments', 'p.comment')
         .loadRelationCountAndMap('p.likes', 'p.like').getMany();   
         
-        
         if(user) {     
             const data = fixData(user, req['user'].id);
             res.status(200).json(data);
         }
         else
-            res.status(404).json("could not find any user");
+            res.status(404).json("Could not find any user");
     } catch(err) {
         res.status(500).json({error: err.message});
     }
@@ -84,7 +82,7 @@ export async function addPost(req: Request, res: Response){
 export async function addOrDeleteFollower(req: Request, res: Response){
     let follow : Follow;
     try{
-        follow = await Follow.findOne({ where: { follower: req['user'].id, user: req.params.userToFollowId }})
+        follow = await Follow.findOne({ where: { follower: req['user'].id, user: req.params.userToFollowId }});
     } catch(err) {
         return res.status(500).json({error: err.message});
     }

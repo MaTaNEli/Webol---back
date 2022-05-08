@@ -58,7 +58,6 @@ export async function logInPost(req: Request, res: Response){
         return res.status(400).json({error: "Email or Password are incorrect"});
 
     let result: User;
-    
     try{
         // Check if user is in DB
         result = await User.findOne({ 
@@ -74,13 +73,13 @@ export async function logInPost(req: Request, res: Response){
     
     try{
         if(result && await bcrypt.compare(req.body.password, result.password)){
-            const token = createToken(result.id, result.username)
+            const token = createToken(result.id, result.username);
             
             const UserInfo = {
                 profileImage: result.profileImage,
                 username: result.username,
                 auth_token: token                    
-            }
+            };
             res.status(200).json({UserInfo});
         }
         else{
@@ -100,6 +99,7 @@ export async function googleLogIn(req: Request, res: Response){
             where:{email: req.body.email.trim()},
             select:['id', 'username', 'profileImage']
         });
+
         if(!user){
             // Generate username
             const username = await userNameGenerator(req.body.email);
@@ -126,7 +126,7 @@ export async function googleLogIn(req: Request, res: Response){
     };
 
     if(user){
-        const token = createToken(user.id, user.username)
+        const token = createToken(user.id, user.username);
         const UserInfo = {
             profileImage: user.profileImage,
             username: user.username,
@@ -160,7 +160,6 @@ export async function passwordReset(req: Request, res: Response){
         await passEmailVer.passResetMail(user);
         res.status(200).json({message:"Email send"});
     }catch(error){
-        //console.log(error)
         res.status(400).json({error:"User did not found"});
     }  
 };
@@ -168,7 +167,7 @@ export async function passwordReset(req: Request, res: Response){
 export async function passUpdate(req: Request, res: Response){
     const pass = {
         password: req.body.password
-    }
+    };
 
     // Validate the data
     const { error } = validate.passwordValidation(pass);
@@ -203,7 +202,7 @@ async function userNameGenerator(email: string){
         tempUser = await User.findOne({
             where:{username: username},
             select: ['username']
-        })
+        });
     } while (tempUser);
     return username;
 };

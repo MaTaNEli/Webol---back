@@ -19,6 +19,9 @@ export default class Notification extends BaseEntity {
     @Column()
     profileImage: string;
 
+    @Column()
+    user: string;
+
     @Index()
     @Column()
     userId : string;

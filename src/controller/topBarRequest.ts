@@ -31,6 +31,7 @@ export async function getNotifications(req: Request, res: Response){
         .addSelect('notification.message', 'message')
         .addSelect('notification.profileImage', 'profileImage')
         .addSelect('notification.postId', 'postId')
+        .addSelect('notification.user', 'user')
         .execute()
 
         await Notification.update({ userId: req['user'].id, read: false },{ read: true });
@@ -45,20 +46,21 @@ export async function getNotifications(req: Request, res: Response){
 export async function addNotification (message: string, userId: string, postId: string, userConnect: string){
     if(!(userConnect === userId)){
         try{
-            const user = await User.findOne({where: {id: userConnect}, select : ['profileImage']});
-            await creatNotification(message, userId, postId, user.profileImage).save()
+            const user = await User.findOne({where: {id: userConnect}, select : ['profileImage', 'username']});
+            await creatNotification(message, userId, postId, user.profileImage, user.username).save();
         }catch(err){
-            console.log('there was an error with the notification save on controller/globalPageRequest:',err.message)
+            console.log('error with the notification save on controller/globalPageRequest:',err.message);
         }
     }
 };
 
-function creatNotification(message: string, userId: string, postId: string, profileImage: string){
+function creatNotification(message: string, userId: string, postId: string, profileImage: string, name: string){
     const notification = new Notification;
     notification.message = message;
     notification.userId = userId;
     notification.postId = postId;
     notification.profileImage = profileImage;
+    notification.user = name;
     notification.read = false;
     return notification;
 }
