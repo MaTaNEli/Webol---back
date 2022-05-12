@@ -4,6 +4,23 @@ import { getManager } from 'typeorm';
 import User from '../entity/user';
 import Notification from '../entity/notification';
 
+export async function findUsers(req: Request, res: Response){
+    try{
+        const user = await getManager()
+        .createQueryBuilder(User,"user")
+        .where("user.username like :name", { name:`%${req.params.username.toLocaleLowerCase()}%`})
+        .select('user.username')
+        .addSelect('user.profileImage')
+        .orderBy('username','ASC')
+        .limit(10).offset(+req.params.offset)
+        .getMany();
+
+        res.status(201).json(user);
+    } catch(err) {
+        return res.status(500).json({error: err.message});
+    }
+};
+
 export async function countNotifications(req: Request, res: Response){
     try{
         const notification =  await getManager()

@@ -17,7 +17,7 @@ export async function registerPosts(req: Request, res: Response){
         const result = await User.findOne({ 
             where: [
                 { email: req.body.email.trim() },
-                { username: req.body.username.trim() }
+                { username: req.body.username.toLocaleLowerCase().trim() }
             ],
             select: ['username', 'email']
         });
@@ -211,7 +211,7 @@ function createUser(fullName: string, email: string, username: string){
     const user = new User();
     user.fullName = fullName;
     user.email = email;
-    user.username = username;
+    user.username = username.toLocaleLowerCase();
     user.profileImage = process.env.PROFILE_IMAGE;
     user.themeImage = process.env.THEME_IMAGE;
     return user;

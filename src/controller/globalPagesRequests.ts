@@ -14,7 +14,7 @@ import { addNotification } from './topBarRequest';
 const AMOUNT = 20;
 export async function getHomePage(req: Request, res: Response){
     try{
-        const subQ = await getManager()
+        const subQ = getManager()
         .createQueryBuilder(User,"user")
         .leftJoinAndSelect(Follow, 'f', 'user.id = f.followerId')
         .select('f.userId')

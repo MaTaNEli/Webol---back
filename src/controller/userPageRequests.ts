@@ -115,6 +115,31 @@ export async function deletePost(req: Request, res: Response){
     }
 };
 
+// Delete one post of user
+export async function getFollowers(req: Request, res: Response){
+    try{
+        const subQ = getManager()
+        .createQueryBuilder(User,"user")
+        .leftJoinAndSelect(Follow,'f', 'user.id = f.userId')
+        .where(`user.username = '${req.params.username}'`)
+        .limit(20).offset(+req.params.offset)
+        .select('f.follower')
+
+        const result = await getManager()
+        .getRepository(User)
+        .createQueryBuilder("user")     
+        .where("user.id IN (" + subQ.getQuery() + ")")
+        .select('user.username')
+        .addSelect('user.profileImage')
+        .distinct(true)
+        .getMany()
+         
+        res.status(201).send(result);
+    }catch(err) {
+        return res.status(500).json({error: err.message});
+    }
+};
+
 //------------------------------- Create functions -----------------------------------
 function fixData(user: User[], id: string){
     fixDate(user);

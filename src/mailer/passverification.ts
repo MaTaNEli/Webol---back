@@ -31,7 +31,7 @@ export async function passResetMail(user: UserInput & { id: string }) {
             <h4>Let's reset your password so you can get back to learn some more amazing things</h4>
     
             <p>kindly use this
-            <a href="http://localhost:3000/resetpass/${user.id}/${token}"> link</a> to verify your email address</p>
+            <a href="https://webol-front.herokuapp.com/resetpass/${user.id}/${token}"> link</a> to verify your email address</p>
     
             <p>always here to help, Webol</p>`
     };
