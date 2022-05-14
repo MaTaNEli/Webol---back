@@ -13,3 +13,17 @@ export async function initStorage() {
         //logging: true
     })
 };
+
+export async function initLocalStorage() {
+    await createConnection({
+        type: 'postgres',
+        host: process.env.PG_HOST_LOCAL,
+        port: parseInt(process.env.PG_PORT_LOCAL),
+        username: process.env.PG_USER_LOCAL,
+        password: process.env.PG_PASS_LOCAL,
+        database: process.env.PG_DB_LOCAL,
+        entities: [ __dirname + '/entity/*{.ts,.js}' ],
+        synchronize: true,
+        //logging: true
+    })
+};

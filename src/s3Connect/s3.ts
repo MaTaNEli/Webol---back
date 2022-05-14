@@ -1,8 +1,8 @@
 import aws from 'aws-sdk';
 import crypto from 'crypto';
 import { promisify } from 'util';
-const randomBytes = promisify(crypto.randomBytes);
 
+const randomBytes = promisify(crypto.randomBytes);
 const region = process.env.S3_REGION;
 const bucketName = process.env.S3_BUCKET;
 const accessKeyId = process.env.AWS_ACCESS_KEY_ID;

@@ -21,7 +21,7 @@ export async function getUserPage(req: Request, res: Response){
         .leftJoinAndMapOne('p.like', Like, 'like',
             `like.user = '${req['user'].id}' and p.id = like.post`)
         .orderBy('p.id','DESC').limit(AMOUNT)
-        .where(`user.username = '${req.params.username}'`)
+        .where(`user.username = '${req.params.username.toLocaleLowerCase()}'`)
         .loadRelationCountAndMap("user.followers", "user.follow")
         .loadRelationCountAndMap("user.posts", "user.post")
         .loadRelationCountAndMap('p.comments', 'p.comment')

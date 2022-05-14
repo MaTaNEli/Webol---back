@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import { getConnection } from "typeorm"
-import { initStorage } from '../src/storage';
+import { initLocalStorage } from '../src/storage';
 import User from '../src/entity/user';
 import { registerRequest } from './utilities/apiFunctions';
 import { faker } from '@faker-js/faker';
@@ -9,24 +9,24 @@ import { faker } from '@faker-js/faker';
 describe("Register functions", () =>{
     beforeAll(async() =>{
         try{
-            await initStorage();
+            await initLocalStorage();
         }
         catch(e){
             console.log(e);
         };
     });
     
-    // afterAll(async () =>{
-    //     try{
-    //         await getConnection()
-    //         .createQueryBuilder()
-    //         .delete()
-    //         .from(User).execute();
-    //     }
-    //     catch(e){
-    //         console.log(e);
-    //     } 
-    // });
+    afterAll(async () =>{
+        try{
+            await getConnection()
+            .createQueryBuilder()
+            .delete()
+            .from(User).execute();
+        }
+        catch(e){
+            console.log(e);
+        } 
+    });
 
     test("When username is missing should respond with a status code of 400",async () => {
         const body = {

@@ -31,6 +31,9 @@ export async function updateSettings(req: Request, res: Response){
     validateTheInput(req.body, errorMessage);
 
     const data = dinamicData(req.body);
+
+    if(data.username)
+        data.username = data.username.toLocaleLowerCase();
     
     try{
         const username = await User.findOne({where: {username: req.body.username}, select : ['username']});

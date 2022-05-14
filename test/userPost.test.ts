@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 import { getConnection } from "typeorm"
 import User from '../src/entity/user';
-import { initStorage } from '../src/storage';
+import { initLocalStorage } from '../src/storage';
 import { loginRequest, registerRequest, addPostRequest } from './utilities/apiFunctions';
 import { createFullUserDetails } from './utilities/utilitiesFunctions';
 
@@ -15,24 +15,24 @@ const post = {
 describe("User page request - add post functions", () =>{
     beforeAll(async() =>{
         try{
-            await initStorage();
+            await initLocalStorage();
         }
         catch(e){
             console.log(e);
         };
     });
     
-    // afterAll(async () =>{
-    //     try{
-    //         await getConnection()
-    //         .createQueryBuilder()
-    //         .delete()
-    //         .from(User).execute();
-    //     }
-    //     catch(e){
-    //         console.log(e);
-    //     } 
-    // });
+    afterAll(async () =>{
+        try{
+            await getConnection()
+            .createQueryBuilder()
+            .delete()
+            .from(User).execute();
+        }
+        catch(e){
+            console.log(e);
+        } 
+    });
 
     test("When post not connected respond with a status code of 401", async () => {
         const result = await addPostRequest(post, null);
