@@ -85,8 +85,10 @@ function creatNotification(message: string, userId: string, postId: string, prof
 }
 
 function deleteUserInSearch(user:User[], username:string){
+    let users = []
     for (let [ key, value ] of Object.entries(user))
-        if(value.displayUsername === username)
-            user.splice(+key, +key)
-    return user;
+        if(value.displayUsername != username)
+            users.push(value)
+            
+    return users;
 }
