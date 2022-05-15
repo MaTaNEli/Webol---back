@@ -52,7 +52,7 @@ export async function getMoreUserPost(req: Request, res: Response){
         .orWhere(`user.username = '${req.params.username.toLocaleLowerCase()}' AND post.userId = '${req['user'].id}'
                 AND user.id = '${req['user'].id}'`)
         .distinct(true)
-        .limit(20).offset(+req.params.offset)
+        .limit(AMOUNT).offset(+req.params.offset)
         .orderBy('post.id','DESC')
         .loadRelationCountAndMap('post.comments', 'post.comment')
         .loadRelationCountAndMap('post.likes', 'post.like').getMany(); 

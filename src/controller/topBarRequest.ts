@@ -12,10 +12,12 @@ export async function findUsers(req: Request, res: Response){
         .select('user.displayUsername')
         .addSelect('user.profileImage')
         .orderBy('username','ASC')
-        .limit(10).offset(+req.params.offset)
+        .limit(20).offset(+req.params.offset)
         .getMany();
 
-        res.status(201).json(user);
+        const resulte = deleteUserInSearch(user, req['user'].username)
+
+        res.status(201).json(resulte);
     } catch(err) {
         return res.status(500).json({error: err.message});
     }
@@ -80,4 +82,11 @@ function creatNotification(message: string, userId: string, postId: string, prof
     notification.user = name;
     notification.read = false;
     return notification;
+}
+
+function deleteUserInSearch(user:User[], username:string){
+    for (let [ key, value ] of Object.entries(user))
+        if(value.displayUsername === username)
+            user.splice(+key, +key)
+    return user;
 }
