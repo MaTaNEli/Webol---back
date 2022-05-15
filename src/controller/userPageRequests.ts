@@ -48,8 +48,8 @@ export async function getMoreUserPost(req: Request, res: Response){
         .leftJoin('user.follow','follow', 'user.id = follow.userId')
         .leftJoinAndMapOne('post.like', Like, 'like',
             `like.user = '${req['user'].id}' and post.id = like.post`)
-        .where(`follow.followerId = '${req['user'].id}' AND user.username = '${req.params.username}'`)
-        .orWhere(`user.username = '${req.params.username}' AND post.userId = '${req['user'].id}'
+        .where(`follow.followerId = '${req['user'].id}' AND user.username = '${req.params.username.toLocaleLowerCase()}'`)
+        .orWhere(`user.username = '${req.params.username.toLocaleLowerCase()}' AND post.userId = '${req['user'].id}'
                 AND user.id = '${req['user'].id}'`)
         .distinct(true)
         .limit(20).offset(+req.params.offset)
@@ -121,7 +121,7 @@ export async function getFollowers(req: Request, res: Response){
         const subQ = getManager()
         .createQueryBuilder(User,"user")
         .leftJoinAndSelect(Follow,'f', 'user.id = f.userId')
-        .where(`user.username = '${req.params.username}'`)
+        .where(`user.username = '${req.params.username.toLocaleLowerCase()}'`)
         .limit(20).offset(+req.params.offset)
         .select('f.follower')
 
@@ -129,7 +129,7 @@ export async function getFollowers(req: Request, res: Response){
         .getRepository(User)
         .createQueryBuilder("user")     
         .where("user.id IN (" + subQ.getQuery() + ")")
-        .select('user.username')
+        .select('user.displayUsername')
         .addSelect('user.profileImage')
         .distinct(true)
         .getMany()
@@ -143,7 +143,7 @@ export async function getFollowers(req: Request, res: Response){
 //------------------------------- Create functions -----------------------------------
 function fixData(user: User[], id: string){
     fixDate(user);
-    const blackList = ['password', 'follow']
+    const blackList = ['password', 'follow', 'username']
     let data = [];
         const isMe = user[0].id == id;
         data.push(isMe);

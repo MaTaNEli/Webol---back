@@ -36,7 +36,7 @@ export async function getHomePage(req: Request, res: Response){
         .getMany()
 
         if(result){
-            const info = deeplyFilterUser(result, req['user'].username);;
+            const info = deeplyFilterUser(result, req['user'].username.toLocaleLowerCase());;
             res.status(201).json(info);
         }
         else
@@ -113,7 +113,7 @@ export async function getComments(req: Request, res: Response){
         .limit(AMOUNT).getMany() 
         
         if(user[0]){
-            const result = deeplyFilterUser(user[0], req['user'].username);
+            const result = deeplyFilterUser(user[0], req['user'].username.toLocaleLowerCase());
             res.status(200).json(result);
         }  
         else
@@ -132,7 +132,7 @@ export async function getLikes(req: Request, res: Response){
         .orderBy('likes.id','DESC')
         .limit(AMOUNT).offset(+req.params.offset)
         .where(`likes.post = '${req.params.postId}'`)
-        .select('u.username', 'username')
+        .select('u.displayUsername', 'displayUsername')
         .addSelect('u.profileImage', 'profileImage')
         .execute()   
 
@@ -164,7 +164,7 @@ function createComment (body: CommentInput, id: string){
 }
 
 function filterUser(user: User) {
-    return _.pick(user, ['id', 'username', 'profileImage']);
+    return _.pick(user, ['id', 'displayUsername', 'profileImage']);
 }
 
 function filterisMe(user: string, name:string) {

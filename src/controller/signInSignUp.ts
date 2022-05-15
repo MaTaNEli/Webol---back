@@ -16,7 +16,7 @@ export async function registerPosts(req: Request, res: Response){
         // Check if user is in DB
         const result = await User.findOne({ 
             where: [
-                { email: req.body.email.trim() },
+                { email: req.body.email.toLocaleLowerCase().trim() },
                 { username: req.body.username.toLocaleLowerCase().trim() }
             ],
             select: ['username', 'email']
@@ -62,10 +62,10 @@ export async function logInPost(req: Request, res: Response){
         // Check if user is in DB
         result = await User.findOne({ 
             where: [
-                { email: req.body.username.trim() },
-                { username: req.body.username.trim() }
+                { email: req.body.username.toLocaleLowerCase().trim() },
+                { username: req.body.username.toLocaleLowerCase().trim() }
             ],
-            select: ['id', 'password', 'username', 'profileImage'] 
+            select: ['id', 'password', 'displayUsername', 'profileImage'] 
         });
     } catch(err) {
         return res.status(500).json({error: err.message});
@@ -73,11 +73,11 @@ export async function logInPost(req: Request, res: Response){
     
     try{
         if(result && await bcrypt.compare(req.body.password, result.password)){
-            const token = createToken(result.id, result.username);
+            const token = createToken(result.id, result.displayUsername);
             
             const UserInfo = {
                 profileImage: result.profileImage,
-                username: result.username,
+                username: result.displayUsername,
                 auth_token: token                    
             };
             res.status(200).json({UserInfo});
@@ -97,7 +97,7 @@ export async function googleLogIn(req: Request, res: Response){
     try{
         user = await User.findOne({
             where:{email: req.body.email.trim()},
-            select:['id', 'username', 'profileImage']
+            select:['id', 'displayUsername', 'profileImage']
         });
 
         if(!user){
@@ -117,8 +117,8 @@ export async function googleLogIn(req: Request, res: Response){
     if(!user){
         try{
             user = await User.findOne({ 
-                where:{ email: req.body.email },
-                select: ['id', 'username', 'profileImage']
+                where:{ email: req.body.email.toLocaleLowerCase().trim() },
+                select: ['id', 'displayUsername', 'profileImage']
             });
         } catch(err) {
             return res.status(500).json({error: err.message});
@@ -126,10 +126,10 @@ export async function googleLogIn(req: Request, res: Response){
     };
 
     if(user){
-        const token = createToken(user.id, user.username);
+        const token = createToken(user.id, user.displayUsername);
         const UserInfo = {
             profileImage: user.profileImage,
-            username: user.username,
+            username: user.displayUsername,
             auth_token: token                    
         };
         res.status(200).json({UserInfo});
@@ -149,7 +149,7 @@ export async function passwordReset(req: Request, res: Response){
     let user: User;
     try{
         user = await User.findOne({ 
-            where: { email: req.body.email },
+            where: { email: req.body.email.toLocaleLowerCase().trim() },
             select: ['id', 'fullName', 'email', 'password']
         });
     } catch(err) {
@@ -210,8 +210,9 @@ async function userNameGenerator(email: string){
 function createUser(fullName: string, email: string, username: string){
     const user = new User();
     user.fullName = fullName;
-    user.email = email;
+    user.email = email.toLocaleLowerCase();
     user.username = username.toLocaleLowerCase();
+    user.displayUsername = username;
     user.profileImage = process.env.PROFILE_IMAGE;
     user.themeImage = process.env.THEME_IMAGE;
     return user;

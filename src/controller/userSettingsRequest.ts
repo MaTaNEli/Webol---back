@@ -31,16 +31,14 @@ export async function updateSettings(req: Request, res: Response){
     validateTheInput(req.body, errorMessage);
 
     const data = dinamicData(req.body);
-
-    if(data.username)
-        data.username = data.username.toLocaleLowerCase();
-    
+    let username: User;
     try{
-        const username = await User.findOne({where: {username: req.body.username}, select : ['username']});
-        if(username && username.username != req['user'].username)
+        if(data.username)
+            username = await User.findOne({where: {username: data.username}, select : ['displayUsername']});
+        if(username && username.displayUsername != req['user'].username)
             errorMessage.username = 'Username is already exist';
 
-        const user = await User.findOne({where: {id: req['user'].id}, select : ['password', 'username']});
+        const user = await User.findOne({where: {id: req['user'].id}, select : ['password', 'displayUsername']});
         if(data.password){
             if (await bcrypt.compare(req.body.password, user.password) && !errorMessage.password){
                 const salt = await bcrypt.genSalt(12);
@@ -57,7 +55,7 @@ export async function updateSettings(req: Request, res: Response){
         }else
             await User.update({ id: req['user'].id }, data);
         
-        const token = createToken(req['user'].id, data.username? data.username : user.username);
+        const token = createToken(req['user'].id, data.username? data.displayUsername : user.displayUsername);
         const UserInfo = {
             username: user.username,
             auth_token: token                    
@@ -75,6 +73,7 @@ function dinamicData(input: Object){
         bio: input['bio'],
         fullName: input['fullName'],
         username: input['username'],
+        displayUsername: input['username'],
         password: input['newPassword']
     };
     
@@ -84,8 +83,13 @@ function dinamicData(input: Object){
     if (!updateData.fullName)
         delete updateData.fullName;
     
-    if (!updateData.username) 
+    if (!updateData.username){
         delete updateData.username;
+        delete updateData.displayUsername;
+    }
+    else
+        updateData.username = updateData.username.toLocaleLowerCase();
+    
 
     if (!updateData.password)
         delete updateData.password;

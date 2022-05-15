@@ -9,7 +9,7 @@ export async function findUsers(req: Request, res: Response){
         const user = await getManager()
         .createQueryBuilder(User,"user")
         .where("user.username like :name", { name:`%${req.params.username.toLocaleLowerCase()}%`})
-        .select('user.username')
+        .select('user.displayUsername')
         .addSelect('user.profileImage')
         .orderBy('username','ASC')
         .limit(10).offset(+req.params.offset)
@@ -63,8 +63,8 @@ export async function getNotifications(req: Request, res: Response){
 export async function addNotification (message: string, userId: string, postId: string, userConnect: string){
     if(!(userConnect === userId)){
         try{
-            const user = await User.findOne({where: {id: userConnect}, select : ['profileImage', 'username']});
-            await creatNotification(message, userId, postId, user.profileImage, user.username).save();
+            const user = await User.findOne({where: {id: userConnect}, select : ['profileImage', 'displayUsername']});
+            await creatNotification(message, userId, postId, user.profileImage, user.displayUsername).save();
         }catch(err){
             console.log('error with the notification save on controller/globalPageRequest:',err.message);
         }
