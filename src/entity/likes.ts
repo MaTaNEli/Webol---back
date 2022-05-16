@@ -1,4 +1,4 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, ManyToOne, Index } from "typeorm";
+import { BaseEntity, Entity, PrimaryGeneratedColumn, ManyToOne, Index } from "typeorm";
 import Post from './post';
 import User from "./user";
 

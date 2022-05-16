@@ -2,7 +2,8 @@ import { Request, Response } from 'express';
 import _ from 'lodash';
 import { getManager } from 'typeorm';
 import User from '../entity/user';
-import Notification from '../entity/notification';
+import Notifications from '../entity/notification';
+import { deeplyFilterUser } from './globalPagesRequests';
 
 export async function findUsers(req: Request, res: Response){
     try{
@@ -26,9 +27,9 @@ export async function findUsers(req: Request, res: Response){
 export async function countNotifications(req: Request, res: Response){
     try{
         const notification =  await getManager()
-        .getRepository(Notification)
+        .getRepository(Notifications)
         .createQueryBuilder("notification")
-        .where(`notification.userId = '${req['user'].id}'`)
+        .where(`notification.user = '${req['user'].id}'`)
         .andWhere('notification.read = false')
         .getCount()
 
@@ -41,20 +42,18 @@ export async function countNotifications(req: Request, res: Response){
 export async function getNotifications(req: Request, res: Response){
     try{
         const notification =  await getManager()
-        .getRepository(Notification)
+        .getRepository(Notifications)
         .createQueryBuilder("notification")
-        .orderBy('id','DESC')
+        .where(`notification.userConnect = '${req['user'].id}'`)
+        .leftJoinAndSelect("notification.user", 'user')
+        .orderBy('notification.id','DESC')
         .limit(5)
-        .where(`notification.userId = '${req['user'].id}'`)
-        .select('notification.read', 'read')
-        .addSelect('notification.message', 'message')
-        .addSelect('notification.profileImage', 'profileImage')
-        .addSelect('notification.postId', 'postId')
-        .addSelect('notification.user', 'user')
-        .execute()
+        
+        .getMany()
 
-        await Notification.update({ userId: req['user'].id, read: false },{ read: true });
-        res.status(201).json(notification);
+        const info = deeplyFilterUser(notification, req['user'].username.toLocaleLowerCase());
+        await Notifications.update({ user: req['user'].id, read: false },{ read: true });
+        res.status(201).json(info);
         
     } catch(err) {
         return res.status(500).json({error: err.message});
@@ -65,24 +64,18 @@ export async function getNotifications(req: Request, res: Response){
 export async function addNotification (message: string, userId: string, postId: string, userConnect: string){
     if(!(userConnect === userId)){
         try{
-            const user = await User.findOne({where: {id: userConnect}, select : ['profileImage', 'displayUsername']});
-            await creatNotification(message, userId, postId, user.profileImage, user.displayUsername).save();
+            const notification = new Notifications;
+            notification.message = message;
+            notification.postId = postId;
+            notification.userConnect = userId;
+            notification.user = userConnect;
+            notification.read = false;
+            await notification.save();
         }catch(err){
             console.log('error with the notification save on controller/globalPageRequest:',err.message);
         }
     }
 };
-
-function creatNotification(message: string, userId: string, postId: string, profileImage: string, name: string){
-    const notification = new Notification;
-    notification.message = message;
-    notification.userId = userId;
-    notification.postId = postId;
-    notification.profileImage = profileImage;
-    notification.user = name;
-    notification.read = false;
-    return notification;
-}
 
 function deleteUserInSearch(user:User[], username:string){
     let users = []

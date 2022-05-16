@@ -1,7 +1,8 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, Index } from "typeorm";
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, Index, ManyToOne } from "typeorm";
+import User from "./user";
 
-@Entity("notification")
-@Index(["userId", "read"])
+@Entity("notifications")
+@Index(["userConnect", "read"])
 export default class Notification extends BaseEntity {
     
     @PrimaryGeneratedColumn()
@@ -16,13 +17,11 @@ export default class Notification extends BaseEntity {
     @Column({ nullable: true })
     postId: string;
 
-    @Column()
-    profileImage: string;
-
-    @Column()
-    user: string;
-
     @Index()
     @Column()
-    userId : string;
+    userConnect : string;
+
+    @Index()
+    @ManyToOne(() => User, (user: User) => user.notifications, {onDelete: "CASCADE", onUpdate: "CASCADE"})
+    user : string;
 };

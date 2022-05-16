@@ -36,7 +36,7 @@ export async function getHomePage(req: Request, res: Response){
         .getMany()
 
         if(result){
-            const info = deeplyFilterUser(result, req['user'].username.toLocaleLowerCase());;
+            const info = deeplyFilterUser(result, req['user'].username.toLocaleLowerCase());
             res.status(201).json(info);
         }
         else
@@ -171,7 +171,7 @@ function filterisMe(user: string, name:string) {
     return user === name? true : false;
 }
 
-function deeplyFilterUser(obj: Object, username: string) {
+export function deeplyFilterUser(obj: Object, username: string) {
     const clonedObj = _.cloneDeep(obj);
     for (let [ key, value ] of Object.entries(clonedObj)) {
         if(key === 'createdAt')  

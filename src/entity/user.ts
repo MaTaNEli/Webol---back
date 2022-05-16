@@ -3,6 +3,8 @@ import Post from './post';
 import Follow from './follow';
 import Comment from './comment';
 import Like from './likes';
+import Message from './messages';
+import Notifications from './notification';
 
 @Entity("users")
 export default class User extends BaseEntity {
@@ -51,4 +53,13 @@ export default class User extends BaseEntity {
 
     @OneToMany(() => Like, (like: Like) => like.user, {cascade: true})
     like: Array<Like>;
+
+    @OneToMany(() => Message, (message: Message) => message.sender, {cascade: true})
+    messageSend: Array<Message>;
+
+    @OneToMany(() => Notifications, (notifications: Notifications) => notifications.user, {cascade: true})
+    notifications: Array<Notifications>;
+
+    @OneToMany(() => Message, (message: Message) => message.recipient , {cascade: true})
+    messageRecipient : Array<Message>;
 }

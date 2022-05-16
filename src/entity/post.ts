@@ -1,4 +1,5 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, ManyToOne, OneToMany, CreateDateColumn, Index } from "typeorm";
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn,
+    ManyToOne, OneToMany, CreateDateColumn, Index } from "typeorm";
 import User from './user';
 import Comment from './comment'
 import Likes from "./likes";
