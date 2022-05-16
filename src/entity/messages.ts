@@ -24,5 +24,5 @@ export default class Messages extends BaseEntity {
 
     @Index()
     @ManyToOne(() => User, (user: User) => user.messageRecipient, {onDelete: "CASCADE", onUpdate: "CASCADE"})
-    recipient : string;
+    recipient: string;
 };

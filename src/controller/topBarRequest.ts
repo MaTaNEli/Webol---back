@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import _ from 'lodash';
 import { getManager } from 'typeorm';
 import User from '../entity/user';
-import Notifications from '../entity/notification';
+import Notifications from '../entity/notifications';
 import { deeplyFilterUser } from './globalPagesRequests';
 
 export async function findUsers(req: Request, res: Response){
@@ -29,7 +29,7 @@ export async function countNotifications(req: Request, res: Response){
         const notification =  await getManager()
         .getRepository(Notifications)
         .createQueryBuilder("notification")
-        .where(`notification.user = '${req['user'].id}'`)
+        .where(`notification.userConnect = '${req['user'].id}'`)
         .andWhere('notification.read = false')
         .getCount()
 
@@ -48,11 +48,10 @@ export async function getNotifications(req: Request, res: Response){
         .leftJoinAndSelect("notification.user", 'user')
         .orderBy('notification.id','DESC')
         .limit(5)
-        
         .getMany()
 
         const info = deeplyFilterUser(notification, req['user'].username.toLocaleLowerCase());
-        await Notifications.update({ user: req['user'].id, read: false },{ read: true });
+        await Notifications.update({ userConnect: req['user'].id, read: false },{ read: true });
         res.status(201).json(info);
         
     } catch(err) {

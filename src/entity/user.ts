@@ -4,7 +4,7 @@ import Follow from './follow';
 import Comment from './comment';
 import Like from './likes';
 import Message from './messages';
-import Notifications from './notification';
+import Notifications from './notifications';
 
 @Entity("users")
 export default class User extends BaseEntity {
