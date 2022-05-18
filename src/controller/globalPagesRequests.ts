@@ -177,7 +177,7 @@ export function deeplyFilterUser(obj: Object, username: string) {
         if(key === 'createdAt')  
             clonedObj[key]  = value.toLocaleString();
         
-        else if (key === 'user'){
+        else if (key === 'user' || key === 'sender'){
             clonedObj[key] = filterUser(value);
             clonedObj['isMe'] = filterisMe(value.username, username)
         }

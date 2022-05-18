@@ -15,6 +15,7 @@ import userRequest from './routes/userRequest';
 import globalRequest from './routes/globalRequest';
 import userSettings from './routes/userSetting';
 import topBar from './routes/topBar';
+import messages from './routes/messages';
 import s3 from './routes/s3';
 
 function errHandler(req: Request, res: Response){
@@ -23,9 +24,10 @@ function errHandler(req: Request, res: Response){
 
 // Routes
 app.use('/s3', s3);
+app.use('/topbar', topBar);
 app.use('/', signInSignUp);
 app.use('/user', userRequest);
-app.use('/topbar', topBar)
+app.use('/message', messages);
 app.use('/update', userSettings);
 app.use('/global', globalRequest);
 

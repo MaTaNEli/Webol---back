@@ -4,6 +4,7 @@ import User from "./user";
 
 @Entity("messages")
 @Index(["sender", "recipient"])
+@Index(["recipient", "read"])
 export default class Messages extends BaseEntity {
     
     @PrimaryGeneratedColumn()

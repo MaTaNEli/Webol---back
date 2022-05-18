@@ -83,10 +83,10 @@ export async function logInPost(req: Request, res: Response){
             res.status(200).json({UserInfo});
         }
         else{
-            res.status(401).json({error: "Email or Password are incorrect"});
+            res.status(403).json({error: "Email or Password are incorrect"});
         }
     }catch(err){
-        res.status(401).json({error: err});
+        res.status(403).json({error: err});
    }
     
 };
