@@ -26,7 +26,8 @@ export async function getUsersUnreadMessages(req: Request, res: Response){
         const unreadMessages = await getReadMessages(req['user'].id, false);
         const readMessages = await getReadMessages(req['user'].id, true);
         const final = readMessages.length > 0 ? unreadMessages.concat(readMessages) : unreadMessages
-        return res.status(201).json(final);
+        const temp = _.uniqBy(final, 'id')
+        return res.status(201).json(temp);
       
     } catch(err) {
         return res.status(500).json({error: err.message});
@@ -50,7 +51,7 @@ export async function getMessages(req: Request, res: Response){
         .leftJoinAndSelect("message.sender", 'sender')
         .where(`message.recipient = '${req['user'].id}' AND message.sender = '${req.params.senderId}'`)
         .orWhere(`message.recipient = '${req.params.senderId}' AND message.sender = '${req['user'].id}'`)
-        .orderBy('message.id','DESC')
+        .orderBy('message.id','ASC')
         .limit(AMOUNT).offset(+req.params.offset)
         .getMany()
 
@@ -82,17 +83,18 @@ async function getReadMessages(id: string, bool: Boolean){
     .andWhere(`message.read = ${bool}`)
     .select("message.sender", "id").distinct(true)
 
+
     const result = await getManager()
     .getRepository(User)
     .createQueryBuilder("user")
     .leftJoinAndSelect("user.messageSend", 'mes')
     .where("user.id IN (" + subQ.getQuery() + ")")
     .loadRelationCountAndMap('user.messages', 'user.messageSend',
-        'messages', (qb) => qb.where('messages.read IS false'))
+        'messages', (qb) => qb.where(`messages.recipient = '${id}' AND messages.read IS false`))
     .select('user.id')
     .addSelect('user.displayUsername')
     .addSelect('user.profileImage')
-    .orderBy('mes.createdAt','DESC')
+    .orderBy('mes.id','DESC')
     .getMany()
 
     return result;
