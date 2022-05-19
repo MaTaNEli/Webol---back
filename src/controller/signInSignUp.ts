@@ -76,6 +76,7 @@ export async function logInPost(req: Request, res: Response){
             const token = createToken(result.id, result.displayUsername);
             
             const UserInfo = {
+                id: result.id,
                 profileImage: result.profileImage,
                 username: result.displayUsername,
                 auth_token: token                    
@@ -128,6 +129,7 @@ export async function googleLogIn(req: Request, res: Response){
     if(user){
         const token = createToken(user.id, user.displayUsername);
         const UserInfo = {
+            id: user.id,
             profileImage: user.profileImage,
             username: user.displayUsername,
             auth_token: token                    
