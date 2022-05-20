@@ -20,7 +20,8 @@ export function addNotification(userId: string) {
     return notifications
 };
 
-export function removeNotification(socketId: string){
-    Object.keys(notifications).map((k) => {notifications[k] === socketId &&  delete notifications[k]})
+export function removeNotification(userId: string){
+    if(notifications[userId])
+        delete notifications[userId];
     return notifications;
 };

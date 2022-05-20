@@ -81,13 +81,13 @@ export async function logInPost(req: Request, res: Response){
                 username: result.displayUsername,
                 auth_token: token                    
             };
-            res.status(200).json({UserInfo});
+            return res.status(200).json(UserInfo);
         }
         else{
-            res.status(403).json({error: "Email or Password are incorrect"});
+            return res.status(403).json({error: "Email or Password are incorrect"});
         }
     }catch(err){
-        res.status(403).json({error: err});
+        return res.status(403).json({error: err});
    }
     
 };
@@ -134,7 +134,7 @@ export async function googleLogIn(req: Request, res: Response){
             username: user.displayUsername,
             auth_token: token                    
         };
-        res.status(200).json({UserInfo});
+        res.status(200).json(UserInfo);
     }
     else{
         res.status(404).send();

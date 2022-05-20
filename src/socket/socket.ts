@@ -26,7 +26,11 @@ export function socketConnection(socket: Socket){
         const userData = util.addNotification(receiverId);
         const userSocket = await util.getUser(receiverId);
         if(userSocket)
-            io.in(userSocket).emit("getNotification", userData);
-    })
+            io.in(userSocket).emit("getNotification", userData[receiverId]);
+    });
+
+    socket.on("eraseNotification",async (Id)=> {
+        const userData = util.removeNotification(Id);
+    });
 }
 
