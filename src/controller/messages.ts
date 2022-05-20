@@ -26,8 +26,8 @@ export async function getUsersUnreadMessages(req: Request, res: Response){
         const unreadMessages = await getReadMessages(req['user'].id, false);
         const readMessages = await getReadMessages(req['user'].id, true);
         const final = readMessages.length > 0 ? unreadMessages.concat(readMessages) : unreadMessages
-        const temp = _.uniqBy(final, 'id')
-        return res.status(201).json(temp);
+        const users = _.uniqBy(final, 'id');
+        return res.status(201).json(users);
       
     } catch(err) {
         return res.status(500).json({error: err.message});
@@ -56,8 +56,17 @@ export async function getMessages(req: Request, res: Response){
         .getMany()
 
         const info = deeplyFilterUser(result, req['user'].username.toLocaleLowerCase());
-        await Messages.update({ recipient: req['user'].id, read: false },{ read: true });
+        await Messages.update({ recipient: req['user'].id, sender: req.params.senderId, read: false },{ read: true });
         res.status(201).json(info);
+    } catch(err) {
+        return res.status(500).json({error: err.message});
+    }
+}
+
+export async function leaveConversation(req: Request, res: Response){
+    try{
+        await Messages.update({ recipient: req['user'].id, sender: req.params.senderId, read: false },{ read: true });
+        res.status(201).json();
     } catch(err) {
         return res.status(500).json({error: err.message});
     }
@@ -86,7 +95,7 @@ async function getReadMessages(id: string, bool: Boolean){
     .getRepository(Messages)
     .createQueryBuilder("message")
     .leftJoinAndSelect("message.sender", "user")
-    .where(`message.sender = '${id}'`)  
+    .where(`message.sender = '${id}' AND message.read = ${bool}`)  
     .select("message.recipient", "id").distinct(true)
 
     const result = await getManager()

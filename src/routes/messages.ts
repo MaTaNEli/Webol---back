@@ -11,5 +11,6 @@ router.post('/sendmessage', verify.connect, controller.sendMessages);
 router.get('/check', verify.connect, controller.checkMessages);
 router.get('/getusersmessages', verify.connect, controller.getUsersUnreadMessages);
 router.get('/getmessages/:senderId/:offset', verify.connect, controller.getMessages);
+router.get('/leaveconversation/:senderId', verify.connect, controller.leaveConversation);
 
 export default router;

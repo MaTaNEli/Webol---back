@@ -3,7 +3,7 @@ dotenv.config();
 import 'reflect-metadata';
 import app from './server';
 import { initStorage } from './storage';
-import {socketConnection} from './socket';
+import {socketConnection} from './socket/socket';
 
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {cors: {origin: '*'}});
