@@ -15,11 +15,12 @@ export function socketConnection(socket: Socket){
 
     socket.on("sendMessage",async ({ senderId, receiverId, text}) => {
         const userSocket = await util.getUser(receiverId);
-        if(userSocket)
+        if(userSocket){
             io.to(userSocket).emit("getMessage", {
                 senderId,
                 text,
-            }); 
+            });
+        }
     });
 
     socket.on("sendNotification",async (receiverId)=> {
@@ -27,6 +28,7 @@ export function socketConnection(socket: Socket){
         const userSocket = await util.getUser(receiverId);
         if(userSocket)
             io.in(userSocket).emit("getNotification", userData[receiverId]);
+        
     });
 
     socket.on("eraseNotification",async (Id)=> {

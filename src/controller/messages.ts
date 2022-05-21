@@ -23,11 +23,11 @@ export async function checkMessages(req: Request, res: Response){
 
 export async function getUsersUnreadMessages(req: Request, res: Response){
     try{
-        const unreadMessages = await getReadMessages(req['user'].id, false);
+        const unreadMessages = await getReadMessages(req['user'].id, false); 
         const readMessages = await getReadMessages(req['user'].id, true);
-        const final = readMessages.length > 0 ? unreadMessages.concat(readMessages) : unreadMessages
-        const users = _.uniqBy(final, 'id');
-        return res.status(201).json(users);
+        let final = readMessages.length > 0 ? unreadMessages.concat(readMessages) : unreadMessages
+        final = _.uniqBy(final, 'id');
+        return res.status(201).json(final);
       
     } catch(err) {
         return res.status(500).json({error: err.message});
@@ -36,7 +36,8 @@ export async function getUsersUnreadMessages(req: Request, res: Response){
 
 export async function sendMessages(req: Request, res: Response){
     try{
-        await createMessage(req.body,  req['user'].id).save();
+        if(req.body.recipient != req['user'].id)
+            await createMessage(req.body, req['user'].id).save();
         res.status(201).send();
     } catch(err) {
         return res.status(500).json({error: err.message});
@@ -51,7 +52,7 @@ export async function getMessages(req: Request, res: Response){
         .leftJoinAndSelect("message.sender", 'sender')
         .where(`message.recipient = '${req['user'].id}' AND message.sender = '${req.params.senderId}'`)
         .orWhere(`message.recipient = '${req.params.senderId}' AND message.sender = '${req['user'].id}'`)
-        .orderBy('message.id','ASC')
+        .orderBy('message.id','DESC')
         .limit(AMOUNT).offset(+req.params.offset)
         .getMany()
 

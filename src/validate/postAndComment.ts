@@ -9,8 +9,6 @@ export function addPostValidation(data : PostInput) {
     return schema.validate(data);  
 };
 
-
-
 export function addCommentValidation(data : CommentInput) {
     const schema = Joi.object({
         content: Joi.string().required(),
