@@ -33,8 +33,8 @@ export default class User extends BaseEntity {
     @Column({ nullable: true })
     password: string;
 
-    @Column({ nullable: true })
-    role: string;
+    @Column({type: "text", array: true, nullable: true})
+    roles: string[];
 
     @Column({ nullable: true })
     bio: string;

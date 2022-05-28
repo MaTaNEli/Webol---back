@@ -4,6 +4,45 @@ import { getManager } from 'typeorm';
 import User from '../entity/user';
 import Notifications from '../entity/notifications';
 import { deeplyFilterUser } from './globalPagesRequests';
+import Follow from '../entity/follow';
+import Post from '../entity/post';
+import Like from '../entity/likes';
+
+const AMOUNT = 20;
+export async function findPosts(req: Request, res: Response){
+    try{
+        const subQ = getManager()
+        .createQueryBuilder(User,"user")
+        .leftJoinAndSelect(Follow, 'f', 'user.id = f.followerId')
+        .select('f.userId')
+        .where(`user.id = '${req['user'].id}'`);
+
+        const result = await getManager()
+        .getRepository(Post)
+        .createQueryBuilder("post")     
+        .leftJoinAndSelect("post.user", "u")
+        .where("post.user IN (" + subQ.getQuery() + ")")
+        .andWhere("post.description like :description", { description:`%${req.params.description.toLocaleLowerCase()}%`})
+        .orWhere(`post.user = '${req['user'].id}'`)
+        .orderBy('post.id','DESC')
+        .limit(AMOUNT).offset(+req.params.offset)
+        .select('post.description')
+        .addSelect('post.id')
+        .addSelect('u.profileImage')
+        .addSelect('u.displayUsername')
+        .distinct(true)
+        .getMany() 
+  
+        for (let [ key, value ] of Object.entries(result))
+            if(value.description)
+                value.description = value.description.substring(0,20) + '...';
+
+        res.status(201).json(result);
+        
+    } catch(err) {
+        return res.status(500).json({error: err.message});
+    }
+};
 
 export async function findUsers(req: Request, res: Response){
     try{
@@ -16,9 +55,9 @@ export async function findUsers(req: Request, res: Response){
         .limit(20).offset(+req.params.offset)
         .getMany();
 
-        const resulte = deleteUserInSearch(user, req['user'].username)
+        const result = deleteUserInSearch(user, req['user'].username)
 
-        res.status(201).json(resulte);
+        res.status(201).json(result);
     } catch(err) {
         return res.status(500).json({error: err.message});
     }

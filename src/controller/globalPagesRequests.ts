@@ -186,7 +186,7 @@ export function deeplyFilterUser(obj: Object, username: string) {
             clonedObj[key] = deeplyFilterUser(value, username);
 
         else if (_.isArray(value)) 
-            clonedObj[key] = value.map(v => deeplyFilterUser(v, username));
+            clonedObj[key] = value.map(v => deeplyFilterUser(v, username));   
     }
     return clonedObj;
 }
