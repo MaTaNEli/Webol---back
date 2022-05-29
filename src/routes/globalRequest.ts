@@ -16,4 +16,5 @@ router.get('/getcategories/:category/:offset', verify.connect, controller.getCat
 
 // ----------- Auth Delete Routes -----------
 router.delete('/deletecomment/:commentId', verify.connect, controller.deleteComment);
+
 export default router;

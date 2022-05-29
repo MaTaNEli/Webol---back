@@ -168,7 +168,10 @@ export async function getCategories(req: Request, res: Response){
         .distinct()
         .getMany();
 
-        res.status(200).json(category);
+        const arr: Array<string> = [];
+        category.map(k=> arr.push(k.name))
+
+        res.status(200).json(arr);
 
     } catch(err) {
         return res.status(500).json({error: err.message});

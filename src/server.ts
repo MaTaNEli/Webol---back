@@ -34,7 +34,7 @@ app.use('/global', globalRequest);
 //Get all the err without crash
 app.use(errHandler);
 
-async () =>{ 
+async () =>{
     await getConnection().close();
 };
 
