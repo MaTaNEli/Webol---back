@@ -10,6 +10,7 @@ import Like from '../entity/likes';
 import User from '../entity/user';
 import Follow from '../entity/follow';
 import { addNotification } from './topBarRequest';
+import Categories from '../entity/categories';
 
 const AMOUNT = 20;
 export async function getHomePage(req: Request, res: Response){
@@ -154,6 +155,26 @@ export async function deleteComment(req: Request, res: Response){
     }
 };
 
+export async function getCategories(req: Request, res: Response){
+    const stringCategory = fixString(req.params.category)
+    try{
+        const category = await getManager()
+        .createQueryBuilder(Categories,"categories")
+        .where("categories.name = 'General'")
+        .orWhere("categories.name like :name", { name:`%${stringCategory}%`})
+        .select('categories.name')
+        .orderBy('name','ASC')
+        .limit(AMOUNT).offset(+req.params.offset)
+        .distinct()
+        .getMany();
+
+        res.status(200).json(category);
+
+    } catch(err) {
+        return res.status(500).json({error: err.message});
+    }
+};
+
 //------------------------------- Create functions -----------------------------------
 function createComment (body: CommentInput, id: string){
     const comment = new Comment;
@@ -189,4 +210,14 @@ export function deeplyFilterUser(obj: Object, username: string) {
             clonedObj[key] = value.map(v => deeplyFilterUser(v, username));   
     }
     return clonedObj;
+}
+
+//------------------------------- Utilities functions -----------------------------------
+export function fixString(str: String) {
+    var tempString: String
+    if(str)
+        tempString = str.charAt(0).toUpperCase()
+    if(str.length > 1)
+        tempString += str.slice(1)
+    return tempString;
 }

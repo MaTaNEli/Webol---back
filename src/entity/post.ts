@@ -19,6 +19,9 @@ export default class Post extends BaseEntity {
     @Column({ nullable: true })
     url: string;
 
+    @Column()
+    category: string;
+
     @Index()
     @ManyToOne(() => User, (user: User) => user.post, {onDelete: "CASCADE", onUpdate: "CASCADE"})
     user: string;

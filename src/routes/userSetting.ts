@@ -10,7 +10,7 @@ router.put('/updatesettings', verify.connect, controller.updateSettings);
 
 // ----------- Auth Get Routes -----------
 router.get('/userinfo', verify.connect, controller.getUserInfo);
-
+router.get('/getroles/:role/:offset', verify.connect, controller.getUserInfo);
 export default router;
 
 //==========================================================================

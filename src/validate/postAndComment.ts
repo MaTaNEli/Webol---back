@@ -4,7 +4,8 @@ import { PostInput, CommentInput } from '../types';
 export function addPostValidation(data : PostInput) {
     const schema = Joi.object({
         description: Joi.string().required(),
-        url: Joi.string()
+        url: Joi.string(),
+        category: Joi.string().required()
     });
     return schema.validate(data);  
 };

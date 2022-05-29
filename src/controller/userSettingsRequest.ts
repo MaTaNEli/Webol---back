@@ -4,6 +4,9 @@ import bcrypt from 'bcryptjs';
 import _ from 'lodash';
 import * as validate from '../validate/userValidate';
 import { createToken } from './signInSignUp';
+import { fixString } from './globalPagesRequests';
+import { getManager } from 'typeorm';
+import Roles from '../entity/roles';
 
 // get the user profile information
 export async function getUserInfo(req: Request, res: Response){
@@ -22,6 +25,26 @@ export async function updateUserImage(req: Request, res: Response){
         res.status(201).send();
     } catch(err) {
         res.status(500).json({error: err.message});
+    }
+};
+
+// Update the user profile image or theme image
+export async function getRoles(req: Request, res: Response){
+    const stringRole = fixString(req.params.role)
+    try{
+        const category = await getManager()
+        .createQueryBuilder(Roles,"roles")
+        .where("roles.name like :name", { name:`%${stringRole}%`})
+        .select('categories.name')
+        .orderBy('name','ASC')
+        .limit(20).offset(+req.params.offset)
+        .distinct()
+        .getMany();
+
+        res.status(200).json(category);
+
+    } catch(err) {
+        return res.status(500).json({error: err.message});
     }
 };
 

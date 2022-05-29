@@ -3,10 +3,9 @@ import _ from 'lodash';
 import { getManager } from 'typeorm';
 import User from '../entity/user';
 import Notifications from '../entity/notifications';
-import { deeplyFilterUser } from './globalPagesRequests';
+import { deeplyFilterUser, fixString } from './globalPagesRequests';
 import Follow from '../entity/follow';
 import Post from '../entity/post';
-import Like from '../entity/likes';
 
 const AMOUNT = 20;
 export async function findPosts(req: Request, res: Response){
@@ -22,7 +21,8 @@ export async function findPosts(req: Request, res: Response){
         .createQueryBuilder("post")     
         .leftJoinAndSelect("post.user", "u")
         .where("post.user IN (" + subQ.getQuery() + ")")
-        .andWhere("post.description like :description", { description:`%${req.params.description.toLocaleLowerCase()}%`})
+        .andWhere("post.description like :description",
+            { description:`%${req.params.description.toLocaleLowerCase()}%`})
         .orWhere(`post.user = '${req['user'].id}'`)
         .orderBy('post.id','DESC')
         .limit(AMOUNT).offset(+req.params.offset)
@@ -39,6 +39,26 @@ export async function findPosts(req: Request, res: Response){
 
         res.status(201).json(result);
         
+    } catch(err) {
+        return res.status(500).json({error: err.message});
+    }
+};
+
+export async function findUsersByRole(req: Request, res: Response){
+    const role = fixString(req.params.username)
+    try{
+        const user = await getManager()
+        .createQueryBuilder(User,"user")
+        .where("user.role like :name", { name:`%${role}%`})
+        .select('user.displayUsername')
+        .addSelect('user.profileImage')
+        .orderBy('username','ASC')
+        .limit(20).offset(+req.params.offset)
+        .getMany();
+
+        const result = deleteUserInSearch(user, req['user'].username)
+
+        res.status(201).json(result);
     } catch(err) {
         return res.status(500).json({error: err.message});
     }

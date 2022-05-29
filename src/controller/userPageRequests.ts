@@ -166,6 +166,7 @@ function createPost (body: Post, id: string){
     const post = new Post;
     post.description = body.description;
     post.url = body.url;
+    post.category = body.category;
     post.user = id;
     return post;
 }

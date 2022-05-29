@@ -12,6 +12,7 @@ router.get('/addordeletelike/:postId/:userId', verify.connect, controller.addOrD
 router.get('/gethomepage/:offset', verify.connect, controller.getHomePage);
 router.get('/getcomments/:postId', verify.connect, controller.getComments);
 router.get('/getlikes/:postId/:offset', verify.connect, controller.getLikes);
+router.get('/getcategories/:category/:offset', verify.connect, controller.getCategories);
 
 // ----------- Auth Delete Routes -----------
 router.delete('/deletecomment/:commentId', verify.connect, controller.deleteComment);
