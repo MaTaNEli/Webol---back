@@ -12,4 +12,3 @@ router.post('/resetpass', controller.passwordReset);
 router.post('/updatenewpass', verify.resetPassToken, controller.passUpdate);
 
 export default router;
-

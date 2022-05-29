@@ -35,4 +35,3 @@ export function socketConnection(socket: Socket){
         const userData = util.removeNotification(Id);
     });
 }
-

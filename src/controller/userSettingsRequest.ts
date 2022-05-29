@@ -29,19 +29,31 @@ export async function updateUserImage(req: Request, res: Response){
 };
 
 // Update the user profile image or theme image
+export async function updateRole(req: Request, res: Response){
+    try{
+        await User.update({ id: req['user'].id },{ role: req.params.role });
+        res.status(201).send();
+    } catch(err) {
+        res.status(500).json({error: err.message});
+    }
+};
+
+// Update the user profile image or theme image
 export async function getRoles(req: Request, res: Response){
     const stringRole = fixString(req.params.role)
     try{
-        const category = await getManager()
+        const role = await getManager()
         .createQueryBuilder(Roles,"roles")
         .where("roles.name like :name", { name:`%${stringRole}%`})
-        .select('categories.name')
+        .select('roles.name')
         .orderBy('name','ASC')
         .limit(20).offset(+req.params.offset)
         .distinct()
         .getMany();
 
-        res.status(200).json(category);
+        const arr: Array<string> = [];
+        role.map(k=> arr.push(k.name))
+        res.status(200).json(arr);
 
     } catch(err) {
         return res.status(500).json({error: err.message});

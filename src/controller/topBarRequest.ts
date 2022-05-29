@@ -49,7 +49,7 @@ export async function findUsersByRole(req: Request, res: Response){
     try{
         const user = await getManager()
         .createQueryBuilder(User,"user")
-        .where("user.role like :name", { name:`%${role}%`})
+        .where("user.role like :name", {name:`%${role}%`})
         .select('user.displayUsername')
         .addSelect('user.profileImage')
         .orderBy('username','ASC')
