@@ -10,13 +10,8 @@ router.put('/updatesettings', verify.connect, controller.updateSettings);
 
 // ----------- Auth Get Routes -----------
 router.get('/userinfo', verify.connect, controller.getUserInfo);
+router.get('/userrole', verify.connect, controller.getUserRole);
 router.get('/updaterole/:role', verify.connect, controller.updateRole);
 router.get('/getroles/:role/:offset', verify.connect, controller.getRoles);
 
 export default router;
-
-//==========================================================================
-//router.put('/updatebio', verify.connect, controller.updateBio);
-//router.post('/updateusername', verify.connect, controller.updateUsername);
-//router.post('/updatefullname', verify.connect, controller.updateFullname);
-//router.post('/updatepassword', verify.connect, controller.updatePassword);

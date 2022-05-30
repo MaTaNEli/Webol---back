@@ -18,6 +18,16 @@ export async function getUserInfo(req: Request, res: Response){
     }
 };
 
+// get the user profile information
+export async function getUserRole(req: Request, res: Response){
+    try{
+        const user = await User.findOne({where: {id: req['user'].id}, select : ['role']});
+        res.status(201).send(user);
+    } catch(err) {
+        res.status(500).json({error: err.message});
+    }
+};
+
 // Update the user profile image or theme image
 export async function updateUserImage(req: Request, res: Response){
     try{
@@ -30,12 +40,19 @@ export async function updateUserImage(req: Request, res: Response){
 
 // Update the user profile image or theme image
 export async function updateRole(req: Request, res: Response){
-    try{
-        await User.update({ id: req['user'].id },{ role: req.params.role });
-        res.status(201).send();
-    } catch(err) {
-        res.status(500).json({error: err.message});
+    await User.findOne({where: {id: req.body.id}, select : ['password']});
+    const role = await Roles.findOne({where: {name:req.params.role}})
+    if(role){
+        try{
+            await User.update({ id: req['user'].id },{ role: req.params.role });
+            res.status(201).send();
+        } catch(err) {
+            res.status(500).json({error: err.message});
+        }
+    }else{
+        res.status(400).json({error: "Unvalide role"});
     }
+    
 };
 
 // Update the user profile image or theme image
