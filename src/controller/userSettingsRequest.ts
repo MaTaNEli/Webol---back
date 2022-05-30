@@ -40,7 +40,6 @@ export async function updateUserImage(req: Request, res: Response){
 
 // Update the user profile image or theme image
 export async function updateRole(req: Request, res: Response){
-    await User.findOne({where: {id: req.body.id}, select : ['password']});
     const role = await Roles.findOne({where: {name:req.params.role}})
     if(role){
         try{
