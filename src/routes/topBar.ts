@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/getnotification', verify.connect, controller.getNotifications);
 router.get('/getcountnotification', verify.connect, controller.countNotifications);
 router.get('/findusers/:username/:offset', verify.connect, controller.findUsers);
-router.get('/findusersbyrole/:username/:offset', verify.connect, controller.findUsersByRole);
+router.get('/findusersbyrole/:role/:offset', verify.connect, controller.findUsersByRole);
 router.get('/findposts/:description/:offset', verify.connect, controller.findPosts);
 // ----------- Auth Delete Routes -----------
 

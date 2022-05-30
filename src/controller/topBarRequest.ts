@@ -45,7 +45,8 @@ export async function findPosts(req: Request, res: Response){
 };
 
 export async function findUsersByRole(req: Request, res: Response){
-    const role = fixString(req.params.username)
+    const role = fixString(req.params.role)
+    console.log(role)
     try{
         const user = await getManager()
         .createQueryBuilder(User,"user")
