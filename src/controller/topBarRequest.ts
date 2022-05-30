@@ -53,6 +53,7 @@ export async function findUsersByRole(req: Request, res: Response){
         .where("user.role like :name", {name:`%${role}%`})
         .select('user.displayUsername')
         .addSelect('user.profileImage')
+        .addSelect('user.role')
         .orderBy('username','ASC')
         .limit(20).offset(+req.params.offset)
         .getMany();
