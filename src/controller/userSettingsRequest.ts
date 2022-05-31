@@ -19,9 +19,9 @@ export async function getUserInfo(req: Request, res: Response){
 };
 
 // get the user profile information
-export async function getUserRole(req: Request, res: Response){
+export async function getProfileInfo(req: Request, res: Response){
     try{
-        const user = await User.findOne({where: {id: req['user'].id}, select : ['role']});
+        const user = await User.findOne({where: {id: req['user'].id}, select : ['role', 'isPrivate', 'price']});
         res.status(201).send(user);
     } catch(err) {
         res.status(500).json({error: err.message});
@@ -32,6 +32,34 @@ export async function getUserRole(req: Request, res: Response){
 export async function updateUserImage(req: Request, res: Response){
     try{
         await User.update({ id: req['user'].id },{ [req.params.image]: req.body.imgurl });
+        res.status(201).send();
+    } catch(err) {
+        res.status(500).json({error: err.message});
+    }
+};
+
+export async function updateUserPrice(req: Request, res: Response){
+    try{
+        await User.update({ id: req['user'].id },{ price: +req.body.price });
+        res.status(201).send();
+    } catch(err) {
+        res.status(500).json({error: err.message});
+    }
+};
+
+export async function updateUserPrivateSetting(req: Request, res: Response){
+    try{
+        
+        await getManager()
+        .createQueryBuilder()
+        .update(User)
+        .set({
+            isPrivate: req.body.isPrivate,
+            price: req.body.isPrivate? 0 : null
+        })
+        .where(`id = '${req['user'].id}'`)
+        .execute();
+       
         res.status(201).send();
     } catch(err) {
         res.status(500).json({error: err.message});

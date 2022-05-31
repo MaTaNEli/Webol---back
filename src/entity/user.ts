@@ -33,6 +33,12 @@ export default class User extends BaseEntity {
     @Column({ nullable: true })
     password: string;
 
+    @Column()
+    isPrivate: boolean;
+
+    @Column({ nullable: true })
+    price: number;
+
     @Column({nullable: true})
     role: string;
 

@@ -143,6 +143,7 @@ export async function getFollowers(req: Request, res: Response){
 //------------------------------- Create functions -----------------------------------
 function fixData(user: User[], id: string){
     fixDate(user);
+    console.log(user[0])
     const blackList = ['password', 'follow', 'username']
     let data = [];
         const isMe = user[0].id == id;

@@ -215,6 +215,7 @@ function createUser(fullName: string, email: string, username: string){
     user.email = email.toLocaleLowerCase();
     user.username = username.toLocaleLowerCase();
     user.displayUsername = username;
+    user.isPrivate = false;
     user.profileImage = process.env.PROFILE_IMAGE;
     user.themeImage = process.env.THEME_IMAGE;
     return user;
