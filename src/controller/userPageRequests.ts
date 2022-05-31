@@ -143,13 +143,12 @@ export async function getFollowers(req: Request, res: Response){
 //------------------------------- Create functions -----------------------------------
 function fixData(user: User[], id: string){
     fixDate(user);
-    console.log(user[0])
     const blackList = ['password', 'follow', 'username']
     let data = [];
         const isMe = user[0].id == id;
         data.push(isMe);
         data.push(user[0].follow || isMe ? true : false);
-        data.push(user[0].follow || isMe ? 
+        data.push(user[0].follow || isMe || !user[0].isPrivate? 
             _(user[0]).pickBy((v, k) => !blackList.includes(k)).value()
             :
             _(user[0]).pickBy((v, k) => !blackList.includes(k) && k != "post").value()
