@@ -18,6 +18,7 @@ import topBar from './routes/topBar';
 import messages from './routes/messages';
 import s3 from './routes/s3';
 import paypal from './routes/paypal';
+import recommendation from './routes/recommendation';
 
 function errHandler(req: Request, res: Response){
     res.status(404).json({error: "Sorry could not find the page"});
@@ -32,6 +33,7 @@ app.use('/user', userRequest);
 app.use('/message', messages);
 app.use('/update', userSettings);
 app.use('/global', globalRequest);
+app.use('/recommendation', recommendation);
 
 //Get all the err without crash
 app.use(errHandler);

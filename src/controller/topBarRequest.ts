@@ -137,7 +137,7 @@ export async function addNotification (message: string, userId: string, postId: 
     }
 };
 
-function deleteUserInSearch(user:User[], username:string){
+export function deleteUserInSearch(user:User[], username:string){
     let users = []
     for (let [ key, value ] of Object.entries(user))
         if(value.displayUsername != username)
