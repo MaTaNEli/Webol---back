@@ -1,7 +1,7 @@
 <div align="center">
   <h1>Webol</h1>
   <p>New social media for uploading original content and making money out of it!</p>
-  <a href="https://webol-front.herokuapp.com/"> View Demo</a>
+ 
 </div>
 <hr/>
 
